@@ -25,7 +25,7 @@ export function SignupForm({ onSwitchToLogin }: SignupFormProps) {
     e.preventDefault();
     clearError();
 
-    const result = await signup({ email, password, subscribeNewsletter });
+    const result = await signup({ email, password });
 
     if (result.success) {
       router.push('/my-account');
