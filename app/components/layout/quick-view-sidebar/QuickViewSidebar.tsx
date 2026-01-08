@@ -137,7 +137,7 @@ export function QuickViewSidebar() {
         image: images[0]?.src || '',
         slug: product.slug,
         variation: selectedVariation || undefined,
-      })
+      } as any)
     );
     // Show success feedback (you can add a toast notification here)
     handleClose();
