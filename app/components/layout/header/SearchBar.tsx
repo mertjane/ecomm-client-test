@@ -3,10 +3,10 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useSearch } from "@/lib/hooks/useSearch";
+// import { useSearch } from "@/lib/hooks/useSearch";
 
 export function SearchBar() {
-  const { openSearch } = useSearch();
+  // const { openSearch } = useSearch();
 
   return (
     <div className="relative w-full max-w-md sm:px-2 lg:px-4">
@@ -19,7 +19,7 @@ export function SearchBar() {
           type="text"
           placeholder="Search for products..."
           readOnly
-          onClick={openSearch}
+          // onClick={openSearch}
           className={cn(
             "h-10 w-full pl-12 pr-12 border-0 bg-none shadow-none cursor-pointer",
             "text-base font-normal tracking-wide",
