@@ -1,65 +1,125 @@
-import Image from "next/image";
+import { Hero } from "./components/layout/hero/Hero";
+import { HeroSlide } from "@/types/hero";
+import { CategoryGridSection } from "@/types/category-grid";
+import { CategoryGrid } from "./components/layout/category-grid/CategoryGrid";
+import { SpecialDealsSection } from "./components/layout/special-deals";
+import { PostsGrid } from "./components/layout/posts-grid";
+import { NewsletterSection } from "./components/layout/newsletter";
+import { MediaAndSponsors } from "./components/layout/media-sponsors/MediaAndSponsors";
+
+const heroSlides: HeroSlide[] = [
+  {
+    id: "slide-1",
+    title: "Herringbone Perfection",
+    subtitle: "This Season at Authentic Stone",
+    description:
+      "Order high-quality herringbone marble tiles for kitchens, bathrooms & beyond.",
+    ctaText: "Check It Out!",
+    ctaLink: "/collections/herringbone-tiles",
+    mediaType: "video",
+    mediaSrc: "/videos/hero-christmas.mp4",
+    mediaPoster: "/images/herringboneTiles.avif",
+    theme: "dark",
+  },
+  {
+    id: "slide-2",
+    title: "Marble Chequerboard Tiles",
+    subtitle: "Style That Lasts",
+    description:
+      "Elevate your interiors with the timeless elegance of chequerboard marble tiles — a bold yet classic design that never goes out of style.",
+    ctaText: "Explore Now",
+    ctaLink: "/contact/request-lookbook",
+    mediaType: "image",
+    mediaSrc: "/images/chequerboardTiles.avif",
+    theme: "light",
+  },
+  {
+    id: "slide-3",
+    title: "Luxury with limestone",
+    subtitle: "Limestone Living",
+    description:
+      "Elevate your environment with the natural charm of limestone. Its warm tones and organic textures create serene spaces that balance modern design with timeless elegance. Discover the soft sophistication limestone brings to any setting.",
+    ctaText: "Find Out More",
+    ctaLink: "/collections/limestone-tiles",
+    mediaType: "image",
+    mediaSrc: "/images/limestoneTiles.avif",
+    theme: "light",
+  },
+];
+
+const categorySection: CategoryGridSection = {
+  subheading: "Explore Our Collection",
+  heading: "Premium Stone Selections",
+  categories: [
+    {
+      id: "cat-1",
+      title: "Stone Mosaic Tiles",
+      subtitle: "Artistic Excellence",
+      description: "Create stunning focal points with our handcrafted mosaic tile collections",
+      image: "/images/mosaicTiles.webp",
+      link: "/collections/mosaic-tiles",
+      featured: true,
+      theme: "dark",
+    },
+    {
+      id: "cat-2",
+      title: "Bathroom Tiles",
+      subtitle: "Spa Luxury",
+      image: "/images/bathroomTiles.webp",
+      link: "/collections/bathroom-tiles",
+      theme: "light",
+    },
+    {
+      id: "cat-3",
+      title: "Herringbone Tiles",
+      subtitle: "Timeless Pattern",
+      image: "/images/herringbone.webp",
+      link: "/collections/herringbone-tiles",
+      theme: "dark",
+    },
+    {
+      id: "cat-4",
+      title: "Stone Slabs",
+      subtitle: "Natural Beauty",
+      image: "/images/slabs.webp",
+      link: "/collections/stone-slabs",
+      theme: "light",
+    },
+    {
+      id: "cat-5",
+      title: "New Arrivals",
+      subtitle: "Latest Collection",
+      description: "Discover our newest stone tile collections and exclusive designs",
+      image: "/images/newArrivals.webp",
+      link: "/collections/new-arrivals",
+      featured: true,
+      theme: "light",
+    },
+    {
+      id: "cat-6",
+      title: "Kitchen Tiles",
+      subtitle: "Culinary Elegance",
+      description: "Heat-resistant and durable stone surfaces designed for the heart of the home.",
+      image: "/images/kitchenTiles.webp",
+      link: "/collections/kitchen",
+      featured: false,
+      theme: "dark",
+    },
+  ],
+};
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className=" mx-auto">
+      <Hero slides={heroSlides} autoPlay interval={6000} />
+      <CategoryGrid section={categorySection} />
+      <SpecialDealsSection
+        title="Special Deals"
+        subtitle="Limited Time Offers"
+      />
+      <PostsGrid />
+      <NewsletterSection />
+      <MediaAndSponsors />
     </div>
   );
 }

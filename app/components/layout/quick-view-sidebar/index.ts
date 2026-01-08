@@ -1,0 +1,1 @@
+export { QuickViewSidebar } from './QuickViewSidebar';
