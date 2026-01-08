@@ -66,7 +66,7 @@ function AccountDashboard() {
                   My Account
                 </h1>
                 <p className="text-muted-foreground">
-                  Welcome back, {user?.displayName || user?.email}
+                  Welcome back, {user?.email || "user"}
                 </p>
               </div>
               <button
