@@ -8,9 +8,9 @@ import { CategoryHeader } from '@/app/components/layout/category-header';
 import { ProductActionsBar } from '@/app/components/layout/product-actions';
 import { ProductGrid, LoadMoreButton } from '@/app/components/layout/product-grid';
 import { useProducts } from '@/lib/hooks/useProducts';
-import { productsApi } from '@/lib/api/products';
+//import { productsApi } from '@/lib/api/products';
 import { getCollectionPath } from '@/lib/utils/url-mapping';
-import type { SortOption, SelectedFilters } from '@/types/product';
+//import type { SortOption, SelectedFilters } from '@/types/product';
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
@@ -45,8 +45,8 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   const slug = resolvedParams.slug;
   const router = useRouter();
 
-  const [sortBy, setSortBy] = useState<SortOption>('date');
-  const [filters, setFilters] = useState<SelectedFilters>({});
+  // const [sortBy, setSortBy] = useState<SortOption>('date');
+  // const [filters, setFilters] = useState<SelectedFilters>({});
 
   // Redirect to new collection URL structure
   useEffect(() => {
@@ -57,20 +57,20 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   }, [slug, router]);
 
   // Fetch filter options
-  const { data: filterOptions, isLoading: isLoadingOptions } = useQuery({
-    queryKey: ['filterOptions'],
-    queryFn: productsApi.fetchFilterOptions,
-    staleTime: 1000 * 60 * 60, // 1 hour
-  });
+  // const { data: filterOptions, isLoading: isLoadingOptions } = useQuery({
+  //   queryKey: ['filterOptions'],
+  //   queryFn: productsApi.fetchFilterOptions,
+  //   staleTime: 1000 * 60 * 60, // 1 hour
+  // });
 
-  // Fetch products
-  const { products, meta, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useProducts({
-      slug,
-      per_page: 12,
-      sort: sortBy,
-      filters,
-    });
+  // // Fetch products
+  // const { products, meta, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+  //   useProducts({
+  //     slug,
+  //     per_page: 12,
+  //     sort: sortBy,
+  //     filters,
+  //   });
 
   // Get category metadata
   const categoryInfo = categoryMetadata[slug] || {
@@ -85,29 +85,29 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     { label: categoryInfo.title },
   ];
 
-  const handleFilterChange = (filterType: keyof SelectedFilters, value: string) => {
-    setFilters((prev) => {
-      const currentValues = prev[filterType] || [];
-      const newValues = currentValues.includes(value)
-        ? currentValues.filter((v) => v !== value)
-        : [...currentValues, value];
+  // const handleFilterChange = (filterType: keyof SelectedFilters, value: string) => {
+  //   setFilters((prev) => {
+  //     const currentValues = prev[filterType] || [];
+  //     const newValues = currentValues.includes(value)
+  //       ? currentValues.filter((v) => v !== value)
+  //       : [...currentValues, value];
 
-      return {
-        ...prev,
-        [filterType]: newValues.length > 0 ? newValues : undefined,
-      };
-    });
-  };
+  //     return {
+  //       ...prev,
+  //       [filterType]: newValues.length > 0 ? newValues : undefined,
+  //     };
+  //   });
+  // };
 
-  const clearAllFilters = () => {
-    setFilters({});
-  };
+  // const clearAllFilters = () => {
+  //   setFilters({});
+  // };
 
   return (
     <div className="min-h-screen bg-background">
       <Breadcrumb items={breadcrumbItems} />
       <CategoryHeader title={categoryInfo.title} description={categoryInfo.description} />
-
+{/* 
       <ProductActionsBar
         totalProducts={meta?.total_products || 0}
         sortBy={sortBy}
@@ -118,9 +118,9 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         onFilterChange={handleFilterChange}
         onClearFilters={clearAllFilters}
         currentCategory={slug}
-      />
+      /> */}
 
-      <div className="container mx-auto px-4 py-12">
+      {/* <div className="container mx-auto px-4 py-12">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {[...Array(12)].map((_, i) => (
@@ -153,7 +153,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
             )}
           </>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }
