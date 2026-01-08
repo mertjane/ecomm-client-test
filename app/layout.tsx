@@ -6,7 +6,7 @@ import { Header } from "./components/layout/header/Header";
 import { Cart } from "./components/layout/cart/Cart";
 
 import { QuickViewSidebar } from "./components/layout/quick-view-sidebar";
-import { CartDevTools } from "./components/dev/CartDevTools";
+//import { CartDevTools } from "./components/dev/CartDevTools";
 import { Providers } from "./providers/Providers";
 import Footer from "./components/layout/footer/Footer";
 

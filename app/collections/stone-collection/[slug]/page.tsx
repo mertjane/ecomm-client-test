@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, use } from 'react';
+import { use } from 'react';
 import { Breadcrumb, type BreadcrumbItem } from '@/app/components/layout/breadcrumb';
 import { CategoryHeader } from '@/app/components/layout/category-header';
 import { ProductGrid, LoadMoreButton } from '@/app/components/layout/product-grid';

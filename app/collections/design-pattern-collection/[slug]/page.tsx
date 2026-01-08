@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, use } from 'react';
+import { use } from 'react';
 import { Breadcrumb, type BreadcrumbItem } from '@/app/components/layout/breadcrumb';
 import { CategoryHeader } from '@/app/components/layout/category-header';
-import { ProductActionsBar } from '@/app/components/layout/product-actions';
+// import { ProductActionsBar } from '@/app/components/layout/product-actions';
 import { ProductGrid, LoadMoreButton } from '@/app/components/layout/product-grid';
 import { useProducts } from '@/lib/hooks/useProducts';
 import { getCollectionTitle, getCollectionType } from '@/lib/utils/url-mapping';

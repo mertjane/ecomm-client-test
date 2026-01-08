@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, use, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { use} from 'react';
+// import { useQuery } from '@tanstack/react-query';
 import { Breadcrumb, type BreadcrumbItem } from '@/app/components/layout/breadcrumb';
 import { CategoryHeader } from '@/app/components/layout/category-header';
-import { ProductActionsBar } from '@/app/components/layout/product-actions';
-import { ProductGrid, LoadMoreButton } from '@/app/components/layout/product-grid';
-import { useProducts } from '@/lib/hooks/useProducts';
+// import { ProductActionsBar } from '@/app/components/layout/product-actions';
+// import { ProductGrid, LoadMoreButton } from '@/app/components/layout/product-grid';
+// import { useProducts } from '@/lib/hooks/useProducts';
 //import { productsApi } from '@/lib/api/products';
 import { getCollectionTitle } from '@/lib/utils/url-mapping';
 //import type { SortOption, SelectedFilters } from '@/types/product';
