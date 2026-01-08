@@ -1,5 +1,5 @@
 import { apiClient } from './axios';
-import type { ProductsApiResponse } from '@/types/product';
+import type { ProductResponse } from '@/types/product';
 
 export interface SearchParams {
   q: string;
@@ -39,7 +39,7 @@ export const searchApi = {
   /**
    * Search products by name and optionally filter by category
    */
-  searchProducts: async (params: SearchParams): Promise<ProductsApiResponse> => {
+  searchProducts: async (params: SearchParams): Promise<ProductResponse> => {
     const { q, category, page = 1, per_page = 12 } = params;
 
     const queryParams: Record<string, any> = {
@@ -52,7 +52,7 @@ export const searchApi = {
       queryParams.category = category;
     }
 
-    const { data } = await apiClient.get<ProductsApiResponse>('/api/search', {
+    const { data } = await apiClient.get<ProductResponse>('/api/search', {
       params: queryParams,
     });
 
