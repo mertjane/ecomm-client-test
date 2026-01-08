@@ -161,3 +161,13 @@
 //     </div>
 //   );
 // }
+'use client';
+
+
+const ProductActionsBar = () => {
+  return (
+    <div>ProductActionsBar</div>
+  )
+}
+
+export default ProductActionsBar
