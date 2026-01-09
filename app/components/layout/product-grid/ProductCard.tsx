@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Eye, Package } from 'lucide-react';
 import { useAppDispatch } from '@/lib/redux/hooks';
 import { openQuickView } from '@/lib/redux/slices/quickViewSlice';
+import { PLACEHOLDER_IMAGE } from '@/lib/constants/images';
 import type { Product } from '@/types/product';
 
 interface ProductCardProps {
@@ -18,7 +19,7 @@ export function ProductCard({ product, priority = false}: ProductCardProps) {
   const imageSrc =
     product.images?.[0]?.src ||
     product.yoast_head_json?.og_image?.[0]?.url ||
-    '/images/placeholder.jpg';
+    PLACEHOLDER_IMAGE;
 
   const imageAlt = product.images?.[0]?.alt || product.name;
 
@@ -56,6 +57,11 @@ export function ProductCard({ product, priority = false}: ProductCardProps) {
             priority={priority}
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            unoptimized={imageSrc === PLACEHOLDER_IMAGE}
+            onError={(e) => {
+              // Fallback to placeholder if image fails to load
+              e.currentTarget.src = PLACEHOLDER_IMAGE;
+            }}
           />
         </Link>
 

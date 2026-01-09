@@ -10,6 +10,18 @@ interface MegamenuPanelProps {
   onClose: () => void;
 }
 
+const urlOverrides: Record<string, string> = {
+  'Beiges & Browns': '/colour/beiges-browns',
+  'Creams & Yellows': '/colour/creams-yellows',
+  'Blues & Greens': '/colour/blues-greens',
+  'Reds & Pinks': '/colour/reds-pinks',
+  'Multicolors & Patterns': '/colour/multicolor',
+  // Ensure the singulars are correct too
+  'Whites': '/colour/whites',
+  'Blacks': '/colour/blacks',
+  'Greys': '/colour/greys'
+};
+
 // Column structure for Stone Collection
 const stoneCollectionColumns = [
   {
@@ -92,7 +104,18 @@ export function MegamenuPanel({ item, onClose }: MegamenuPanelProps) {
             {stoneCollectionColumns.map((column, colIndex) => {
               // Find matching items from API data by title
               const columnItems = column.items
-                .map(itemTitle => item.children.find(child => child.title === itemTitle))
+                .map(itemTitle => {
+                  const foundChild = item.children.find(child => child.title === itemTitle);
+                  
+                  // If we found the child, check if we need to force a specific URL
+                  if (foundChild) {
+                    if (urlOverrides[itemTitle]) {
+                      return { ...foundChild, url: urlOverrides[itemTitle] };
+                    }
+                    return foundChild;
+                  }
+                  return undefined;
+                })
                 .filter((child): child is MegamenuItem => child !== undefined);
 
               return (

@@ -9,9 +9,16 @@ export interface ProductMeta {
 
 export interface ProductImage {
   id: number;
+  date_created?: string;
+  date_created_gmt?: string;
+  date_modified?: string;
+  date_modified_gmt?: string;
   src: string;
   name: string;
   alt: string;
+  srcset?: string;
+  sizes?: string;
+  thumbnail?: string;
 }
 
 export interface ProductCategory {
@@ -23,6 +30,10 @@ export interface ProductCategory {
 export interface ProductAttribute {
   id: number;
   name: string;
+  slug?: string;
+  position?: number;
+  visible?: boolean;
+  variation?: boolean;
   options: string[];
 }
 
@@ -31,19 +42,19 @@ export interface Product {
   name: string;
   slug: string;
   permalink: string;
-  date_created: string;
-  date_created_gmt: string;
-  date_modified: string;
-  date_modified_gmt: string;
-  price: string;
-  regular_price: string;
-  sale_price: string;
+  date_created?: string;
+  date_created_gmt?: string;
+  date_modified?: string;
+  date_modified_gmt?: string;
+  price?: string;
+  regular_price?: string;
+  sale_price?: string;
   price_html: string; // This will hold the cleaned numeric string from your regex
   stock_status: "instock" | "outofstock" | "onbackorder";
   categories: ProductCategory[];
   images: ProductImage[];
   attributes: ProductAttribute[];
-  variations: number[];
+  variations?: number[];
   yoast_head_json: {
     og_image: {
       url: string;
@@ -60,3 +71,25 @@ export interface ProductResponse {
   products: Product[];
   meta: ProductMeta;
 }
+
+// Filter Types
+export interface FilterOption {
+  id: number;
+  name: string;
+  slug: string;
+  count: number;
+}
+
+export interface FilterOptions {
+  pa_material: FilterOption[];
+  'pa_room-type-usage': FilterOption[];
+  pa_colour: FilterOption[];
+  pa_finish: FilterOption[];
+}
+
+export interface FilterOptionsResponse {
+  success: boolean;
+  data: FilterOptions;
+}
+
+export type SortOption = 'date' | 'popularity' | 'title' | 'price' | 'price-desc';

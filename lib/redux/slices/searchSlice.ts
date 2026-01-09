@@ -1,27 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Product } from '@/types/product';
 
-interface SearchSuggestion {
-  products: Array<{
-    id: number;
-    name: string;
-    slug: string;
-    image: string | null;
-    price_html: string;
-  }>;
-  categories: Array<{
-    id: number;
-    name: string;
-    slug: string;
-    count: number;
-  }>;
-}
-
 interface SearchState {
   isOpen: boolean;
   query: string;
   results: Product[];
-  suggestions: SearchSuggestion | null;
+  quickResults: Product[];
   popularProducts: Product[];
   isSearching: boolean;
   hasSearched: boolean;
@@ -35,7 +19,7 @@ const initialState: SearchState = {
   isOpen: false,
   query: '',
   results: [],
-  suggestions: null,
+  quickResults: [],
   popularProducts: [],
   isSearching: false,
   hasSearched: false,
@@ -58,7 +42,7 @@ const searchSlice = createSlice({
       // Reset search state when closing
       state.query = '';
       state.results = [];
-      state.suggestions = null;
+      state.quickResults = [];
       state.hasSearched = false;
       state.error = null;
     },
@@ -68,7 +52,7 @@ const searchSlice = createSlice({
       if (action.payload === '') {
         state.hasSearched = false;
         state.results = [];
-        state.suggestions = null;
+        state.quickResults = [];
       }
     },
 
@@ -94,8 +78,9 @@ const searchSlice = createSlice({
       state.error = null;
     },
 
-    setSuggestions: (state, action: PayloadAction<SearchSuggestion>) => {
-      state.suggestions = action.payload;
+    setQuickResults: (state, action: PayloadAction<Product[]>) => {
+      state.quickResults = action.payload;
+      state.isSearching = false;
     },
 
     setPopularProducts: (state, action: PayloadAction<Product[]>) => {
@@ -109,7 +94,7 @@ const searchSlice = createSlice({
 
     clearResults: (state) => {
       state.results = [];
-      state.suggestions = null;
+      state.quickResults = [];
       state.hasSearched = false;
       state.totalResults = 0;
       state.error = null;
@@ -123,7 +108,7 @@ export const {
   setQuery,
   setSearching,
   setSearchResults,
-  setSuggestions,
+  setQuickResults,
   setPopularProducts,
   setError,
   clearResults,

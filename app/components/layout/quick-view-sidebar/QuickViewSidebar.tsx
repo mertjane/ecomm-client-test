@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight, ShoppingCart, Minus, Plus } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ShoppingCart, Minus, Plus, PencilRuler, Ruler } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import { closeQuickView } from '@/lib/redux/slices/quickViewSlice';
 import { addToCart } from '@/lib/redux/slices/cartSlice';
@@ -23,6 +23,7 @@ export function QuickViewSidebar() {
   const [variations, setVariations] = useState<ProductVariation[]>([]);
   const [loadingVariations, setLoadingVariations] = useState(false);
   const [hasChangedQuantity, setHasChangedQuantity] = useState(false);
+  const [isCustomCutOpen, setIsCustomCutOpen] = useState(false);
 
   // Reset state when product changes
   useEffect(() => {
@@ -34,6 +35,7 @@ export function QuickViewSidebar() {
       setCurrentPrice(parsePriceFromHtml(product.price_html || ''));
       setVariations([]);
       setHasChangedQuantity(false);
+      setIsCustomCutOpen(false);
 
       // Fetch variations if product has variation IDs
       if (product.variations && product.variations.length > 0) {
@@ -87,9 +89,11 @@ export function QuickViewSidebar() {
     setCurrentPrice(parsePriceFromHtml(product.price_html || ''));
   }, [selectedVariation, product, variations]);
 
+
+
   // Lock body scroll when sidebar is open
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen || isCustomCutOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -98,7 +102,7 @@ export function QuickViewSidebar() {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [isOpen, isCustomCutOpen]);
 
   if (!product) return null;
 
@@ -108,8 +112,8 @@ export function QuickViewSidebar() {
   // Check if selected variation is a sample
   const isSampleVariation = selectedVariation &&
     (selectedVariation.toLowerCase().includes('sample') ||
-     selectedVariation.toLowerCase().includes('full size sample') ||
-     selectedVariation.toLowerCase().includes('free sample'));
+      selectedVariation.toLowerCase().includes('full size sample') ||
+      selectedVariation.toLowerCase().includes('free sample'));
 
   // Calculate total price (for samples: quantity × price, for regular: sqm × price per sqm)
   const totalPrice = isSampleVariation ? quantity * currentPrice : sqm * currentPrice;
@@ -132,7 +136,7 @@ export function QuickViewSidebar() {
       addToCart({
         id: product.id,
         name: product.name,
-        price: parseFloat(product.price),
+        price: parseFloat(product.price_html),
         quantity,
         image: images[0]?.src || '',
         slug: product.slug,
@@ -254,17 +258,15 @@ export function QuickViewSidebar() {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${
-          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         onClick={handleClose}
       />
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-full md:w-[500px] lg:w-[600px] bg-background z-50 shadow-2xl transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed top-0 right-0 h-full w-full md:w-[500px] lg:w-[600px] bg-background z-50 shadow-2xl transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         <div className="h-full flex flex-col">
           {/* Header */}
@@ -317,11 +319,10 @@ export function QuickViewSidebar() {
                           <button
                             key={index}
                             onClick={() => setCurrentImageIndex(index)}
-                            className={`w-2 h-2 rounded-full transition-all ${
-                              index === currentImageIndex
+                            className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex
                                 ? 'bg-emperador w-6'
                                 : 'bg-white/60 hover:bg-white/80'
-                            }`}
+                              }`}
                             aria-label={`Go to image ${index + 1}`}
                           />
                         ))}
@@ -485,8 +486,92 @@ export function QuickViewSidebar() {
                   </>
                 )}
               </button>
+              {/* CUSTOM CUT TRIGGER SECTION */}
+              <div
+                onClick={() => setIsCustomCutOpen(true)}
+                className="w-full border border-dashed border-emperador/30 bg-emperador/5 rounded-lg p-4 cursor-pointer hover:bg-emperador/10 transition-colors group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0 bg-white p-2.5 rounded-full shadow-sm border border-emperador/10 group-hover:scale-110 transition-transform">
+                    <div className="relative">
+
+                      <PencilRuler className="w-5 h-5 text-emperador relative z-10" />
+
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-emperador tracking-wider uppercase">Can't find your size?</span>
+                    <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors">We can cut any sizes</span>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-emperador/50 ml-auto group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* CUSTOM CUT MODAL  */}
+      {/* Note: Z-index set to 60 to appear above the Sidebar (z-50) */}
+      <div
+        className={`fixed inset-0 z-[60] flex items-center justify-center p-4 transition-all duration-300 ${isCustomCutOpen ? 'visible opacity-100' : 'invisible opacity-0'
+          }`}
+      >
+        {/* Modal Backdrop */}
+        <div
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          onClick={() => setIsCustomCutOpen(false)}
+        />
+
+        {/* Modal Content */}
+        <div
+          className={`relative bg-white w-full max-w-lg rounded-xl shadow-2xl p-6 md:p-8 transform transition-all duration-300 ${isCustomCutOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
+            }`}
+        >
+          <button
+            onClick={() => setIsCustomCutOpen(false)}
+            className="absolute top-4 right-4 p-2 hover:bg-muted rounded-full transition-colors"
+          >
+            <X className="w-5 h-5 text-muted-foreground" />
+          </button>
+
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center bg-emperador/10 p-3 rounded-full mb-4">
+              <Ruler className="w-8 h-8 text-emperador" />
+            </div>
+            <h3 className="text-2xl font-bold text-emperador mb-2">Custom Cutting Service</h3>
+            <p className="text-muted-foreground text-sm">
+              Need a specific size that isn't listed? We offer bespoke cutting services for all our natural stone products.
+            </p>
+          </div>
+
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); /* Handle submit logic */ setIsCustomCutOpen(false); }}>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Width (mm)</label>
+                <input type="number" placeholder="e.g. 600" className="w-full h-10 px-3 border border-border rounded-md focus:ring-1 focus:ring-emperador focus:border-emperador outline-none" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Length (mm)</label>
+                <input type="number" placeholder="e.g. 900" className="w-full h-10 px-3 border border-border rounded-md focus:ring-1 focus:ring-emperador focus:border-emperador outline-none" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Quantity Required</label>
+              <input type="number" placeholder="Total tiles needed" className="w-full h-10 px-3 border border-border rounded-md focus:ring-1 focus:ring-emperador focus:border-emperador outline-none" />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Email Address</label>
+              <input type="email" placeholder="your@email.com" required className="w-full h-10 px-3 border border-border rounded-md focus:ring-1 focus:ring-emperador focus:border-emperador outline-none" />
+            </div>
+
+            <button type="submit" className="w-full bg-emperador hover:bg-emperador/90 text-white font-semibold py-3 rounded-md transition-colors mt-4">
+              Request Quote
+            </button>
+          </form>
         </div>
       </div>
     </>

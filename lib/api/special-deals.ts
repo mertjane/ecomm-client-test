@@ -1,5 +1,6 @@
 import { apiClient } from './axios';
 import { SpecialDealApiResponse, SpecialDeal, WooCommerceProduct } from '@/types/special-deals';
+import { PLACEHOLDER_IMAGE } from '@/lib/constants/images';
 import {
   parsePriceFromHtml,
   generateDiscountPercentage,
@@ -31,7 +32,7 @@ const transformProductToSpecialDeal = (product: WooCommerceProduct): SpecialDeal
     id: product.id.toString(),
     title: product.name,
     category: product.categories?.[0]?.name,
-    image: product.images?.[0]?.src || product.yoast_head_json?.og_image?.[0]?.url || '/images/placeholder.jpg',
+    image: product.images?.[0]?.src || product.yoast_head_json?.og_image?.[0]?.url || PLACEHOLDER_IMAGE,
     link: `/products/${product.slug}`,
     originalPrice: parseFloat(originalPrice.toFixed(2)),
     discountPrice: parseFloat(discountPrice.toFixed(2)),

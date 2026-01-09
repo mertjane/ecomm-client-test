@@ -1,173 +1,132 @@
-// 'use client';
-
-// import { useEffect, useState } from 'react';
-// import { FilterButton } from './FilterButton';
-// import { SortDropdown } from './SortDropdown';
-// import { getMaterialForCategory } from '@/lib/utils/category-material-mapping';
-// import type { FilterOptions, SelectedFilters, SortOption } from '@/types/product';
-
-// interface ProductActionsBarProps {
-//   totalProducts: number;
-//   sortBy: SortOption;
-//   filters: SelectedFilters;
-//   filterOptions?: FilterOptions;
-//   isLoadingOptions?: boolean;
-//   onSortChange: (sortBy: SortOption) => void;
-//   onFilterChange: (filterType: keyof SelectedFilters, value: string) => void;
-//   onClearFilters?: () => void;
-//   currentCategory?: string; // Category slug for smart filtering
-// }
-
-// export function ProductActionsBar({
-//   totalProducts,
-//   sortBy,
-//   filters,
-//   filterOptions,
-//   isLoadingOptions = false,
-//   onSortChange,
-//   onFilterChange,
-//   onClearFilters,
-//   currentCategory,
-// }: ProductActionsBarProps) {
-//   const hasActiveFilters =
-//     (filters?.material?.length ?? 0) > 0 ||
-//     (filters?.roomType?.length ?? 0) > 0 ||
-//     (filters?.colour?.length ?? 0) > 0 ||
-//     (filters?.finish?.length ?? 0) > 0;
-
-//   const [isScrolled, setIsScrolled] = useState(false);
-
-//   // Determine if this category has a locked material
-//   const lockedMaterial = currentCategory ? getMaterialForCategory(currentCategory) : undefined;
-
-//   useEffect(() => {
-//     const handleScroll = () => {
-//       setIsScrolled(window.scrollY > 10);
-//     };
-
-//     window.addEventListener("scroll", handleScroll);
-//     return () => window.removeEventListener("scroll", handleScroll);
-//   }, []);
-
-//   return (
-//     <div className="w-full bg-background border-b border-border z-40">
-//       <div className="container mx-auto px-4 py-4">
-//         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-//           {/* Filters */}
-//           <div className="flex flex-wrap items-center gap-3">
-//             {isLoadingOptions ? (
-//               <span className="text-sm text-muted-foreground">Loading filters...</span>
-//             ) : (
-//               <>
-//                 {filterOptions?.material && filterOptions.material.length > 0 && (
-//                   <FilterButton
-//                     label="Material"
-//                     options={filterOptions.material.map((opt) => opt.name)}
-//                     selectedValues={
-//                       filters?.material?.map((slug) => {
-//                         const option = filterOptions.material.find((opt) => opt.slug === slug);
-//                         return option ? option.name : slug;
-//                       }) || []
-//                     }
-//                     onToggle={(value) => {
-//                       const option = filterOptions.material.find((opt) => opt.name === value);
-//                       if (option) {
-//                         onFilterChange('material', option.slug);
-//                       }
-//                     }}
-//                     lockedValue={lockedMaterial}
-//                   />
-//                 )}
-//                 {filterOptions?.roomType && filterOptions.roomType.length > 0 && (
-//                   <FilterButton
-//                     label="Room Type"
-//                     options={filterOptions.roomType.map((opt) => opt.name)}
-//                     selectedValues={
-//                       filters?.roomType?.map((slug) => {
-//                         const option = filterOptions.roomType.find((opt) => opt.slug === slug);
-//                         return option ? option.name : slug;
-//                       }) || []
-//                     }
-//                     onToggle={(value) => {
-//                       const option = filterOptions.roomType.find((opt) => opt.name === value);
-//                       if (option) {
-//                         onFilterChange('roomType', option.slug);
-//                       }
-//                     }}
-//                   />
-//                 )}
-//                 {filterOptions?.finish && filterOptions.finish.length > 0 && (
-//                   <FilterButton
-//                     label="Finish"
-//                     options={filterOptions.finish.map((opt) => opt.name)}
-//                     selectedValues={
-//                       filters?.finish?.map((slug) => {
-//                         const option = filterOptions.finish.find((opt) => opt.slug === slug);
-//                         return option ? option.name : slug;
-//                       }) || []
-//                     }
-//                     onToggle={(value) => {
-//                       const option = filterOptions.finish.find((opt) => opt.name === value);
-//                       if (option) {
-//                         onFilterChange('finish', option.slug);
-//                       }
-//                     }}
-//                   />
-//                 )}
-//                 {filterOptions?.colour && filterOptions.colour.length > 0 && (
-//                   <FilterButton
-//                     label="Colour"
-//                     options={filterOptions.colour.map((opt) => opt.name)}
-//                     selectedValues={
-//                       filters?.colour?.map((slug) => {
-//                         const option = filterOptions.colour.find((opt) => opt.slug === slug);
-//                         return option ? option.name : slug;
-//                       }) || []
-//                     }
-//                     onToggle={(value) => {
-//                       const option = filterOptions.colour.find((opt) => opt.name === value);
-//                       if (option) {
-//                         onFilterChange('colour', option.slug);
-//                       }
-//                     }}
-//                   />
-//                 )}
-//                 {hasActiveFilters && onClearFilters && (
-//                   <button
-//                     onClick={onClearFilters}
-//                     className="text-sm text-destructive hover:underline"
-//                   >
-//                     Clear all filters
-//                   </button>
-//                 )}
-//               </>
-//             )}
-//           </div>
-
-//           {/* Product Count and Sort */}
-//           <div className="flex items-center gap-4">
-//             <span className="text-sm text-muted-foreground whitespace-nowrap">
-//               {totalProducts} {totalProducts === 1 ? 'product' : 'products'}
-//             </span>
-//             <SortDropdown
-//               value={sortBy}
-//               onChange={(value) => {
-//                 onSortChange(value as SortOption);
-//               }}
-//             />
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
 'use client';
 
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { FilterButton } from './FilterButton';
+import { SortDropdown } from './SortDropdown';
+import { useFilterOptions } from '@/lib/hooks/useFilterOptions';
+import type { SortOption } from '@/types/product';
 
-const ProductActionsBar = () => {
-  return (
-    <div>ProductActionsBar</div>
-  )
+interface ProductActionsBarProps {
+  totalProducts?: number;
+  sortBy: SortOption;
+  onSortChange: (sortBy: SortOption) => void;
 }
 
-export default ProductActionsBar
+const ProductActionsBar = ({ totalProducts = 0, sortBy, onSortChange }: ProductActionsBarProps) => {
+  const { filterOptions, isLoading, isError } = useFilterOptions();
+
+  // Filter states (will be used for actual filtering later)
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+  const [selectedUsageAreas, setSelectedUsageAreas] = useState<string[]>([]);
+  const [selectedColours, setSelectedColours] = useState<string[]>([]);
+  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
+
+  // Toggle handlers for each filter
+  const toggleMaterial = (slug: string) => {
+    setSelectedMaterials(prev =>
+      prev.includes(slug) ? prev.filter(s => s !== slug) : [...prev, slug]
+    );
+  };
+
+  const toggleUsageArea = (slug: string) => {
+    setSelectedUsageAreas(prev =>
+      prev.includes(slug) ? prev.filter(s => s !== slug) : [...prev, slug]
+    );
+  };
+
+  const toggleColour = (slug: string) => {
+    setSelectedColours(prev =>
+      prev.includes(slug) ? prev.filter(s => s !== slug) : [...prev, slug]
+    );
+  };
+
+  const toggleFinish = (slug: string) => {
+    setSelectedFinishes(prev =>
+      prev.includes(slug) ? prev.filter(s => s !== slug) : [...prev, slug]
+    );
+  };
+
+  if (isError) {
+    return (
+      <div className="w-full bg-background border-b border-border">
+        <div className="container mx-auto px-4 py-4">
+          <p className="text-sm text-destructive">Failed to load filters</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full bg-background border-b border-border sticky top-[var(--header-height)] z-40">
+      <div className="container mx-auto px-4 py-3 sm:py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          {/* Left Side: Filters */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            {isLoading ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">Loading filters...</span>
+              </div>
+            ) : (
+              <>
+                {/* Material Filter */}
+                {filterOptions?.pa_material && filterOptions.pa_material.length > 0 && (
+                  <FilterButton
+                    label="Material"
+                    options={filterOptions.pa_material}
+                    selectedValues={selectedMaterials}
+                    onToggle={toggleMaterial}
+                  />
+                )}
+
+                {/* Usage Areas Filter */}
+                {filterOptions?.['pa_room-type-usage'] && filterOptions['pa_room-type-usage'].length > 0 && (
+                  <FilterButton
+                    label="Usage Areas"
+                    options={filterOptions['pa_room-type-usage']}
+                    selectedValues={selectedUsageAreas}
+                    onToggle={toggleUsageArea}
+                  />
+                )}
+
+                {/* Colour Filter */}
+                {filterOptions?.pa_colour && filterOptions.pa_colour.length > 0 && (
+                  <FilterButton
+                    label="Colour"
+                    options={filterOptions.pa_colour}
+                    selectedValues={selectedColours}
+                    onToggle={toggleColour}
+                  />
+                )}
+
+                {/* Finish Filter */}
+                {filterOptions?.pa_finish && filterOptions.pa_finish.length > 0 && (
+                  <FilterButton
+                    label="Finish"
+                    options={filterOptions.pa_finish}
+                    selectedValues={selectedFinishes}
+                    onToggle={toggleFinish}
+                  />
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Right Side: Product Count & Sort */}
+          <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+            {/* Product Count */}
+            <div className="text-sm text-muted-foreground whitespace-nowrap">
+              <span className="font-medium text-foreground">{totalProducts}</span> products
+            </div>
+
+            {/* Sort Dropdown */}
+            <SortDropdown value={sortBy} onChange={onSortChange} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProductActionsBar;

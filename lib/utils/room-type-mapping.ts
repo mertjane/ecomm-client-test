@@ -7,8 +7,11 @@
  */
 export const ROOM_TYPE_GROUPS: Record<string, string[]> = {
   bathroom: ['bathroom-floor', 'bathroom-wall'],
-  kitchen: ['kitchen'], // Add kitchen sub-types if they exist
-  // Add other room types as needed
+  kitchen: ['kitchen', 'kitchen-floor', 'kitchen-splashback'],
+  'living-room': ['living-room', 'living-room-floor'],
+  outdoor: ['outdoor', 'patio'],
+  pool: ['pool'],
+  'wet-room': ['wet-room'],
 };
 
 /**

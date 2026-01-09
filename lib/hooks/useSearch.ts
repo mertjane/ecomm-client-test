@@ -1,175 +1,138 @@
-// import { useCallback, useEffect, useRef } from 'react';
-// import { useAppDispatch, useAppSelector } from '../redux/hooks';
-// import {
-//   setQuery,
-//   setSearching,
-//   setSearchResults,
-//   setSuggestions,
-//   setError,
-//   openSearch,
-//   closeSearch,
-// } from '../redux/slices/searchSlice';
-// import { searchApi } from '../api/search';
+import { useCallback, useEffect, useRef } from 'react';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
+import {
+  setQuery,
+  setSearching,
+  setSearchResults,
+  setQuickResults,
+  setError,
+  openSearch,
+  closeSearch,
+} from '../redux/slices/searchSlice';
+import { searchApi } from '../api/search';
 
-// const DEBOUNCE_DELAY = 500; // 500ms delay for search
-// const SUGGESTION_DELAY = 300; // 300ms delay for suggestions
+const DEBOUNCE_DELAY = 300; // 300ms delay for quick search (first 6 results)
 
-// export function useSearch() {
-//   const dispatch = useAppDispatch();
-//   const searchState = useAppSelector((state) => state.search);
+export function useSearch() {
+  const dispatch = useAppDispatch();
+  const searchState = useAppSelector((state) => state.search);
 
-//   const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-//   const suggestionTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-//   /**
-//    * Perform the actual search
-//    */
-//   const performSearch = useCallback(
-//     async (query: string, page: number = 1) => {
-//       if (!query || query.trim().length === 0) {
-//         return;
-//       }
+  /**
+   * Perform the actual search
+   */
+  const performSearch = useCallback(
+    async (query: string, page: number = 1, perPage: number = 12) => {
+      if (!query || query.trim().length === 0) {
+        return;
+      }
 
-//       dispatch(setSearching(true));
+      dispatch(setSearching(true));
 
-//       try {
-//         const response = await searchApi.searchProducts({
-//           q: query,
-//           page,
-//           per_page: 12,
-//         });
+      try {
+        const response = await searchApi.searchProducts({
+          q: query,
+          page,
+          per_page: perPage,
+        });
 
-//         dispatch(
-//           setSearchResults({
-//             results: response.data,
-//             totalResults: response.meta.total_products,
-//             currentPage: response.meta.current_page,
-//             totalPages: response.meta.total_pages,
-//           })
-//         );
-//       } catch (error) {
-//         console.error('Search error:', error);
-//         dispatch(setError('Failed to search products. Please try again.'));
-//       }
-//     },
-//     [dispatch]
-//   );
+        if (perPage === 6) {
+          // Quick results (first 6)
+          dispatch(setQuickResults(response.data));
+        } else {
+          // Full search results
+          dispatch(
+            setSearchResults({
+              results: response.data,
+              totalResults: response.meta.total_products,
+              currentPage: response.meta.current_page,
+              totalPages: response.meta.total_pages,
+            })
+          );
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        dispatch(setError('Failed to search products. Please try again.'));
+      }
+    },
+    [dispatch]
+  );
 
-//   /**
-//    * Fetch search suggestions
-//    */
-//   const fetchSuggestions = useCallback(
-//     async (query: string) => {
-//       if (!query || query.trim().length < 2) {
-//         dispatch(setSuggestions({ products: [], categories: [] }));
-//         return;
-//       }
+  /**
+   * Handle search input with debouncing
+   */
+  const handleSearch = useCallback(
+    (query: string) => {
+      dispatch(setQuery(query));
 
-//       try {
-//         const suggestions = await searchApi.getSearchSuggestions({
-//           q: query,
-//           limit: 10,
-//         });
+      // Clear existing timeout
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
 
-//         dispatch(setSuggestions(suggestions));
-//       } catch (error) {
-//         console.error('Suggestions error:', error);
-//         // Silently fail for suggestions
-//       }
-//     },
-//     [dispatch]
-//   );
+      // If query is empty, don't search
+      if (!query || query.trim().length === 0) {
+        return;
+      }
 
-//   /**
-//    * Handle search input with debouncing
-//    */
-//   const handleSearch = useCallback(
-//     (query: string) => {
-//       dispatch(setQuery(query));
+      // Show first 6 results quickly when user types
+      if (query.trim().length >= 2) {
+        searchTimeoutRef.current = setTimeout(() => {
+          performSearch(query, 1, 6);
+        }, DEBOUNCE_DELAY);
+      }
+    },
+    [dispatch, performSearch]
+  );
 
-//       // Clear existing timeouts
-//       if (searchTimeoutRef.current) {
-//         clearTimeout(searchTimeoutRef.current);
-//       }
-//       if (suggestionTimeoutRef.current) {
-//         clearTimeout(suggestionTimeoutRef.current);
-//       }
+  /**
+   * Load more results (pagination)
+   */
+  const loadMore = useCallback(
+    (page: number) => {
+      if (searchState.query) {
+        performSearch(searchState.query, page);
+      }
+    },
+    [searchState.query, performSearch]
+  );
 
-//       // If query is empty, don't search
-//       if (!query || query.trim().length === 0) {
-//         return;
-//       }
+  /**
+   * Open search modal
+   */
+  const handleOpenSearch = useCallback(() => {
+    dispatch(openSearch());
+  }, [dispatch]);
 
-//       // Fetch suggestions faster (300ms)
-//       if (query.trim().length >= 2) {
-//         suggestionTimeoutRef.current = setTimeout(() => {
-//           fetchSuggestions(query);
-//         }, SUGGESTION_DELAY);
-//       }
+  /**
+   * Close search modal
+   */
+  const handleCloseSearch = useCallback(() => {
+    dispatch(closeSearch());
 
-//       // Perform full search with longer delay (500ms)
-//       if (query.trim().length >= 3) {
-//         searchTimeoutRef.current = setTimeout(() => {
-//           performSearch(query);
-//         }, DEBOUNCE_DELAY);
-//       }
-//     },
-//     [dispatch, performSearch, fetchSuggestions]
-//   );
+    // Clear timeout on close
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+  }, [dispatch]);
 
-//   /**
-//    * Load more results (pagination)
-//    */
-//   const loadMore = useCallback(
-//     (page: number) => {
-//       if (searchState.query) {
-//         performSearch(searchState.query, page);
-//       }
-//     },
-//     [searchState.query, performSearch]
-//   );
+  /**
+   * Cleanup timeouts on unmount
+   */
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
-//   /**
-//    * Open search modal
-//    */
-//   const handleOpenSearch = useCallback(() => {
-//     dispatch(openSearch());
-//   }, [dispatch]);
-
-//   /**
-//    * Close search modal
-//    */
-//   const handleCloseSearch = useCallback(() => {
-//     dispatch(closeSearch());
-
-//     // Clear timeouts on close
-//     if (searchTimeoutRef.current) {
-//       clearTimeout(searchTimeoutRef.current);
-//     }
-//     if (suggestionTimeoutRef.current) {
-//       clearTimeout(suggestionTimeoutRef.current);
-//     }
-//   }, [dispatch]);
-
-//   /**
-//    * Cleanup timeouts on unmount
-//    */
-//   useEffect(() => {
-//     return () => {
-//       if (searchTimeoutRef.current) {
-//         clearTimeout(searchTimeoutRef.current);
-//       }
-//       if (suggestionTimeoutRef.current) {
-//         clearTimeout(suggestionTimeoutRef.current);
-//       }
-//     };
-//   }, []);
-
-//   return {
-//     ...searchState,
-//     handleSearch,
-//     loadMore,
-//     openSearch: handleOpenSearch,
-//     closeSearch: handleCloseSearch,
-//   };
-// }
+  return {
+    ...searchState,
+    handleSearch,
+    loadMore,
+    openSearch: handleOpenSearch,
+    closeSearch: handleCloseSearch,
+  };
+}

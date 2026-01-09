@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { PLACEHOLDER_IMAGE } from '@/lib/constants/images';
 
 export interface CartItem {
   id: number;
@@ -108,7 +109,7 @@ const cartSlice = createSlice({
           regular_price: 59.99,
           sale_price: 45.99,
           quantity: 2,
-          image: '/images/placeholder.jpg',
+          image: PLACEHOLDER_IMAGE,
           stock_status: 'instock',
           price_html: '<span class="price">£45.99</span> / m²',
         },
@@ -118,7 +119,7 @@ const cartSlice = createSlice({
           slug: 'oak-wood-flooring',
           price: 89.99,
           quantity: 1,
-          image: '/images/placeholder.jpg',
+          image: PLACEHOLDER_IMAGE,
           stock_status: 'instock',
           price_html: '<span class="price">£89.99</span> / m²',
         },
@@ -130,7 +131,7 @@ const cartSlice = createSlice({
           regular_price: 35.00,
           sale_price: 25.50,
           quantity: 3,
-          image: '/images/placeholder.jpg',
+          image: PLACEHOLDER_IMAGE,
           stock_status: 'instock',
           price_html: '<span class="price">£25.50</span> / m²',
         },

@@ -4,7 +4,7 @@ import { Lora } from 'next/font/google';
 import "./globals.css";
 import { Header } from "./components/layout/header/Header";
 import { Cart } from "./components/layout/cart/Cart";
-
+import { Search } from "./components/layout/search/Search";
 import { QuickViewSidebar } from "./components/layout/quick-view-sidebar";
 //import { CartDevTools } from "./components/dev/CartDevTools";
 import { Providers } from "./providers/Providers";
@@ -42,9 +42,9 @@ export default function RootLayout({
 
         <Providers>
           <Header />
+          <Search />
           {children}
           <Cart />
-
           <QuickViewSidebar />
           <Footer />
         </Providers>
