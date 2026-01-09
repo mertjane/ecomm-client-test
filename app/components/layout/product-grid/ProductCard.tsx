@@ -45,6 +45,23 @@ export function ProductCard({ product, priority = false}: ProductCardProps) {
     console.log('Order sample:', product.slug);
   };
 
+const isTile = Array.isArray(product.attributes)
+  ? product.attributes.some(attr =>
+      attr.slug === 'pa_material' &&
+      Array.isArray(attr.options) &&
+      attr.options.some(opt =>
+        ['marble','travertine','limestone','mosaic','granite']
+          .some(v => opt?.toLowerCase()?.includes(v))
+      )
+    )
+  : false;
+
+
+
+
+console.log('Is this a tile?', isTile);
+  
+
   return (
     <div className="group bg-card border border-border hover:shadow-lg transition-all duration-300">
       {/* Image Container */}
@@ -118,18 +135,34 @@ export function ProductCard({ product, priority = false}: ProductCardProps) {
           {product.name}
         </h3>
 
-        {/* Price */}
+        {/* Price Section */}
         <div className="flex items-center">
-          £{priceHtml ? (
-            <div
-              className="text-foreground font-medium"
-              dangerouslySetInnerHTML={{ __html: priceHtml }}
-            />
+          <span className="text-emperador  mr-2">FROM</span>
+          
+          {priceHtml ? (
+            <div className="flex items-baseline gap-1">
+              {/* Price Number */}
+            
+              £
+              <div
+                className="text-foreground font-medium"
+                dangerouslySetInnerHTML={{ __html: priceHtml }}
+              />
+              
+              {/* Unit Suffix */}
+              {isTile && (
+                <span className="text-sm text-muted-foreground font-normal">
+                  / m²
+                </span>
+              )}
+            </div>
           ) : (
             <span className="text-foreground font-medium">N/A</span>
           )}
         </div>
       </Link>
     </div>
+      
+    
   );
 }

@@ -52,7 +52,7 @@ export function HeaderActions() {
       <Button
         variant="ghost"
         size="icon"
-        className="relative h-10 w-10 rounded-full hover:bg-muted/80 transition-colors"
+        className="relative h-10 w-10 rounded-full hover:bg-muted/80 transition-colors relative z-50"
         aria-label="Shopping cart"
         onClick={handleCartClick}
       >
@@ -60,7 +60,7 @@ export function HeaderActions() {
         {itemCount > 0 && (
           <Badge
             variant="destructive"
-            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]"
+            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] z-50"
           >
             {itemCount}
           </Badge>
@@ -73,7 +73,7 @@ export function HeaderActions() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-10 w-10 rounded-full hover:bg-muted/80 transition-colors lg:hidden"
+            className="h-10 w-10 rounded-full hover:bg-muted/80 transition-colors lg:hidden relative z-50"
             aria-label="Menu"
           >
             <Menu className="h-6 w-6" strokeWidth={1.5} />

@@ -12,10 +12,7 @@ export function PageContent({ title, content, className }: PageContentProps) {
   return (
     <article className={cn('container mx-auto px-4 py-12', className)}>
       <div className="max-w-4xl mx-auto">
-        {/* Page Title */}
-        <h1 className="text-foreground mb-8 pb-6 border-b border-border">
-          {title}
-        </h1>
+       
 
         {/* Page Content */}
         <div

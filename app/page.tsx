@@ -15,7 +15,7 @@ const heroSlides: HeroSlide[] = [
     description:
       "Order high-quality herringbone marble tiles for kitchens, bathrooms & beyond.",
     ctaText: "Check It Out!",
-    ctaLink: "/collections/herringbone-tiles",
+    ctaLink: "/collections/design-pattern-collection/herringbone-tiles",
     mediaType: "video",
     mediaSrc: "/videos/hero-christmas.mp4",
     mediaPoster: "/images/herringboneTiles.avif",
@@ -28,7 +28,7 @@ const heroSlides: HeroSlide[] = [
     description:
       "Elevate your interiors with the timeless elegance of chequerboard marble tiles — a bold yet classic design that never goes out of style.",
     ctaText: "Explore Now",
-    ctaLink: "/contact/request-lookbook",
+    ctaLink: "/collections/design-pattern-collection/chequerboard-tiles",
     mediaType: "image",
     mediaSrc: "/images/chequerboardTiles.avif",
     theme: "light",
@@ -40,7 +40,7 @@ const heroSlides: HeroSlide[] = [
     description:
       "Elevate your environment with the natural charm of limestone. Its warm tones and organic textures create serene spaces that balance modern design with timeless elegance. Discover the soft sophistication limestone brings to any setting.",
     ctaText: "Find Out More",
-    ctaLink: "/collections/limestone-tiles",
+    ctaLink: "/collections/stone-collection/limestone-tiles",
     mediaType: "image",
     mediaSrc: "/images/limestoneTiles.avif",
     theme: "light",
@@ -66,7 +66,7 @@ const categorySection: CategoryGridSection = {
       title: "Bathroom Tiles",
       subtitle: "Spa Luxury",
       image: "/images/bathroomTiles.webp",
-      link: "/collections/bathroom-tiles",
+      link: "/room-type-usage/bathroom",
       theme: "light",
     },
     {
@@ -74,7 +74,7 @@ const categorySection: CategoryGridSection = {
       title: "Herringbone Tiles",
       subtitle: "Timeless Pattern",
       image: "/images/herringbone.webp",
-      link: "/collections/herringbone-tiles",
+      link: "/collections/design-pattern-collection/herringbone-tiles",
       theme: "dark",
     },
     {
@@ -82,7 +82,7 @@ const categorySection: CategoryGridSection = {
       title: "Stone Slabs",
       subtitle: "Natural Beauty",
       image: "/images/slabs.webp",
-      link: "/collections/stone-slabs",
+      link: "/collections/slabs",
       theme: "light",
     },
     {
@@ -101,7 +101,7 @@ const categorySection: CategoryGridSection = {
       subtitle: "Culinary Elegance",
       description: "Heat-resistant and durable stone surfaces designed for the heart of the home.",
       image: "/images/kitchenTiles.webp",
-      link: "/collections/kitchen",
+      link: "/room-type-usage/kitchen",
       featured: false,
       theme: "dark",
     },
