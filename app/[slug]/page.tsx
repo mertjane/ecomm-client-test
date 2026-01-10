@@ -2,7 +2,7 @@
 
 import { use } from 'react';
 import { usePageBySlug } from '@/lib/hooks/useWooPages';
-import { PageContent } from '@/app/components/layout/page-content';
+/* import { PageContent } from '@/app/components/layout/page-content'; */
 import { Breadcrumb, type BreadcrumbItem } from '@/app/components/layout/breadcrumb';
 import { Loader2 } from 'lucide-react';
 import { notFound } from 'next/navigation';

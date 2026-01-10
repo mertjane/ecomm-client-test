@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { wooPagesApi } from '../api/woo-pages';
-import type { PageSlug } from '@/types/page';
+/* import type { PageSlug } from '@/types/page'; */
 
 /**
  * Hook to fetch a page by slug using TanStack Query
  * Pages are cached for 24 hours on the backend, so we can cache them longer on the client
  */
-export function usePageBySlug(slug: PageSlug) {
+export function usePageBySlug(slug: string) {
   return useQuery({
     queryKey: ['page', slug],
     queryFn: () => wooPagesApi.fetchPageBySlug(slug),
