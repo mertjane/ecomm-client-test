@@ -21,7 +21,7 @@ export function PostCard({ post }: PostCardProps) {
 
   return (
     <Link
-      href={post.link}
+      href={`/${post.slug}`}
       target="_blank"
       rel="noopener noreferrer"
       className="group block bg-background rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"

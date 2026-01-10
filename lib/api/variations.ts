@@ -43,6 +43,10 @@ export async function fetchProductVariation(
 export async function fetchProductVariations(
   productId: number
 ): Promise<ProductVariation[]> {
+  console.log('Fetching variations for product:', productId);
   const response = await apiClient.get(`/api/variations/${productId}`);
-  return response.data.data;
+  console.log('Variations API full response:', response);
+  console.log('Variations data:', response.data);
+  console.log('Variations array:', response.data.data);
+  return response.data.data || [];
 }

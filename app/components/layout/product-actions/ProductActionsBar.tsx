@@ -1,23 +1,35 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { Loader2, SlidersHorizontal} from 'lucide-react';
 import { FilterButton } from './FilterButton';
 import { SortDropdown } from './SortDropdown';
+import { SelectedFilterOptions, type SelectedFilter } from './SelectedFilterOptions';
 import { useFilterOptions } from '@/lib/hooks/useFilterOptions';
+import { toggleFilterSidebar } from '@/lib/redux/slices/filterSidebarSlice';
 import type { SortOption } from '@/types/product';
 
 interface ProductActionsBarProps {
   totalProducts?: number;
   sortBy: SortOption;
   onSortChange: (sortBy: SortOption) => void;
+  lockedMaterialSlug?: string;
 }
 
-const ProductActionsBar = ({ totalProducts = 0, sortBy, onSortChange }: ProductActionsBarProps) => {
+const ProductActionsBar = ({ totalProducts = 0, sortBy, onSortChange, lockedMaterialSlug }: ProductActionsBarProps) => {
+  const dispatch = useDispatch();
   const { filterOptions, isLoading, isError } = useFilterOptions();
 
+  // Filter out Porcelain tiles from material options
+  const filteredMaterialOptions = filterOptions?.pa_material?.filter(
+    option => option.slug !== 'porcelain-stone'
+  );
+
   // Filter states (will be used for actual filtering later)
-  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+  const [selectedMaterials, setSelectedMaterials] = useState<string[]>(
+    lockedMaterialSlug ? [lockedMaterialSlug] : []
+  );
   const [selectedUsageAreas, setSelectedUsageAreas] = useState<string[]>([]);
   const [selectedColours, setSelectedColours] = useState<string[]>([]);
   const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
@@ -47,6 +59,42 @@ const ProductActionsBar = ({ totalProducts = 0, sortBy, onSortChange }: ProductA
     );
   };
 
+  // Build selected filters array for chips
+  const selectedFilters: SelectedFilter[] = [];
+
+  // Add locked material filter
+  if (lockedMaterialSlug && filteredMaterialOptions) {
+    const materialOption = filteredMaterialOptions.find(opt => opt.slug === lockedMaterialSlug);
+    if (materialOption) {
+      selectedFilters.push({
+        type: 'material',
+        slug: lockedMaterialSlug,
+        name: materialOption.name,
+        locked: true,
+      });
+    }
+  }
+
+  // Handle filter removal
+  const handleRemoveFilter = (type: string, slug: string) => {
+    switch (type) {
+      case 'material':
+        if (!lockedMaterialSlug) {
+          setSelectedMaterials(prev => prev.filter(s => s !== slug));
+        }
+        break;
+      case 'usage-area':
+        setSelectedUsageAreas(prev => prev.filter(s => s !== slug));
+        break;
+      case 'colour':
+        setSelectedColours(prev => prev.filter(s => s !== slug));
+        break;
+      case 'finish':
+        setSelectedFinishes(prev => prev.filter(s => s !== slug));
+        break;
+    }
+  };
+
   if (isError) {
     return (
       <div className="w-full bg-background border-b border-border">
@@ -58,11 +106,12 @@ const ProductActionsBar = ({ totalProducts = 0, sortBy, onSortChange }: ProductA
   }
 
   return (
-    <div className="w-full bg-background border-b border-border sticky top-[var(--header-height)] z-40">
-      <div className="container mx-auto px-4 py-3 sm:py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+    <>
+      <div className="w-full bg-background border-b border-border sticky top-[var(--header-height)] z-40">
+        <div className="container mx-auto px-4 py-3 sm:py-4">
+        <div className="flex flex-row sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           {/* Left Side: Filters */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <div className="flex items-center gap-2 sm:gap-3">
             {isLoading ? (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -70,13 +119,25 @@ const ProductActionsBar = ({ totalProducts = 0, sortBy, onSortChange }: ProductA
               </div>
             ) : (
               <>
+              {/* Mobile Filter */}
+              <div
+                onClick={() => dispatch(toggleFilterSidebar())}
+                className='sm:hidden flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors'
+              >
+                <span className='text-sm text-muted-foreground'>Filters</span>
+                <SlidersHorizontal className='w-4 h-4'/>
+              </div>
+              {/* Desktop Filter */}
+              <div className='sm:flex hidden gap-2'>
                 {/* Material Filter */}
-                {filterOptions?.pa_material && filterOptions.pa_material.length > 0 && (
+                {filteredMaterialOptions && filteredMaterialOptions.length > 0 && (
                   <FilterButton
                     label="Material"
-                    options={filterOptions.pa_material}
+                    options={filteredMaterialOptions}
                     selectedValues={selectedMaterials}
                     onToggle={toggleMaterial}
+                    isMaterialFilter={true}
+                    lockedSlug={lockedMaterialSlug}
                   />
                 )}
 
@@ -109,6 +170,7 @@ const ProductActionsBar = ({ totalProducts = 0, sortBy, onSortChange }: ProductA
                     onToggle={toggleFinish}
                   />
                 )}
+              </div>
               </>
             )}
           </div>
@@ -124,8 +186,15 @@ const ProductActionsBar = ({ totalProducts = 0, sortBy, onSortChange }: ProductA
             <SortDropdown value={sortBy} onChange={onSortChange} />
           </div>
         </div>
+        </div>
       </div>
-    </div>
+
+      {/* Selected Filter Options Chips */}
+      <SelectedFilterOptions
+        filters={selectedFilters}
+        onRemove={handleRemoveFilter}
+      />
+    </>
   );
 };
 

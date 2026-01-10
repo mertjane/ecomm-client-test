@@ -28,6 +28,11 @@ export function QuickViewSidebar() {
   // Reset state when product changes
   useEffect(() => {
     if (product) {
+      console.log('Product opened:', product.name);
+      console.log('Product ID:', product.id);
+      console.log('Product variations field:', product.variations);
+      console.log('Has variations?', product.variations && product.variations.length > 0);
+
       setCurrentImageIndex(0);
       setQuantity(1);
       setSqm(1);
@@ -37,13 +42,20 @@ export function QuickViewSidebar() {
       setHasChangedQuantity(false);
       setIsCustomCutOpen(false);
 
-      // Fetch variations if product has variation IDs
-      if (product.variations && product.variations.length > 0) {
+      // Fetch variations if product has attributes (indicates it might have variations)
+      // We check for attributes instead of variations array because the variations array
+      // might be empty in list responses but the product still has variations
+      const hasVariationAttributes = product.attributes && product.attributes.some(attr =>
+        attr.variation === true || attr.name.toLowerCase().includes('size')
+      );
+
+      if (hasVariationAttributes || (product.variations && product.variations.length > 0)) {
+        console.log('Fetching variations for product ID:', product.id);
         setLoadingVariations(true);
         fetchProductVariations(product.id)
           .then((fetchedVariations) => {
+            console.log('Successfully fetched variations:', fetchedVariations);
             setVariations(fetchedVariations);
-            console.log('Fetched variations:', fetchedVariations);
           })
           .catch((error) => {
             console.error('Failed to fetch variations:', error);
@@ -51,6 +63,8 @@ export function QuickViewSidebar() {
           .finally(() => {
             setLoadingVariations(false);
           });
+      } else {
+        console.log('No variations to fetch - product has no variation attributes');
       }
     }
   }, [product]);
@@ -88,7 +102,6 @@ export function QuickViewSidebar() {
     console.log('Using base product price');
     setCurrentPrice(parsePriceFromHtml(product.price_html || ''));
   }, [selectedVariation, product, variations]);
-
 
 
   // Lock body scroll when sidebar is open

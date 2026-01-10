@@ -27,10 +27,10 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2 border border-border bg-background text-foreground uppercase tracking-wide text-sm font-medium hover:bg-muted transition-colors flex items-center gap-2 min-w-[180px] justify-between"
+        className="px-4 py-2 sm:border sm:border-border bg-background text-foreground uppercase tracking-wide text-sm font-medium cursor-pointer sm:hover:bg-muted transition-colors flex items-center gap-2 sm:min-w-[180px] justify-between"
       >
-        <span className="text-muted-foreground text-xs">Sort By:</span>
-        <span>{currentLabel}</span>
+        <span className="text-muted-foreground text-xs">Sort By</span>
+        <span className='sm:block hidden'>{currentLabel}</span>
         <ChevronDown
           className={`w-4 h-4 transition-transform ${
             isOpen ? 'rotate-180' : ''

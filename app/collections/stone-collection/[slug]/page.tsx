@@ -41,6 +41,7 @@ export default function StoneCollectionPage({ params }: StoneCollectionPageProps
         totalProducts={meta?.total_products || 0}
         sortBy={sortBy}
         onSortChange={setSortBy}
+        lockedMaterialSlug={slug}
       />
       <div className="container mx-auto px-4 py-12">
         {isLoading ? (

@@ -6,7 +6,7 @@ import { CategoryHeader } from '@/app/components/layout/category-header';
 import ProductActionsBar from '@/app/components/layout/product-actions/ProductActionsBar';
 import { ProductGrid, LoadMoreButton } from '@/app/components/layout/product-grid';
 import { useProducts } from '@/lib/hooks/useProducts';
-import { getCollectionTitle, getCollectionType } from '@/lib/utils/url-mapping';
+import { getCollectionTitle, getCollectionType, getCollectionMaterialSlug } from '@/lib/utils/url-mapping';
 import type { SortOption } from '@/types/product';
 
 interface CollectionPageProps {
@@ -17,6 +17,7 @@ export default function CollectionPage({ params }: CollectionPageProps) {
   const { slug } = use(params);
   const collectionType = getCollectionType(slug);
   const title = getCollectionTitle(slug);
+  const lockedMaterialSlug = getCollectionMaterialSlug(slug);
   const [sortBy, setSortBy] = useState<SortOption>('date');
 
   const { products, meta, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
@@ -41,6 +42,7 @@ export default function CollectionPage({ params }: CollectionPageProps) {
         totalProducts={meta?.total_products || 0}
         sortBy={sortBy}
         onSortChange={setSortBy}
+        lockedMaterialSlug={lockedMaterialSlug}
       />
       <div className="container mx-auto px-4 py-12">
         {isLoading ? (

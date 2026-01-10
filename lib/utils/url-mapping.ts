@@ -355,3 +355,19 @@ export function getCollectionTitle(slug: string): string {
 export function getParentPath(slug: string): string | undefined {
   return URL_MAPPINGS[slug]?.parentPath;
 }
+
+/**
+ * Map collection slug to material filter slug
+ * For pages that should have a locked material filter
+ */
+export function getCollectionMaterialSlug(collectionSlug: string): string | undefined {
+  const materialMapping: Record<string, string> = {
+    'mosaic-tiles': 'marble-mosaic-tiles',
+    'stone-pavers': 'stone-paver',
+    'granite-tiles': 'granite-tiles',
+    'clay-brick-slips': 'brick-slips',
+    'mouldings-skirtings': 'mouldings-skirtings',
+  };
+
+  return materialMapping[collectionSlug];
+}

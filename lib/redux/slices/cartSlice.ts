@@ -4,7 +4,7 @@ import { PLACEHOLDER_IMAGE } from '@/lib/constants/images';
 export interface CartItem {
   id: number;
   name: string;
-  slug: string;
+  slug: string; 
   price: number;
   regular_price?: number;
   sale_price?: number;
