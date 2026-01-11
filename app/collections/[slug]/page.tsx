@@ -1,12 +1,15 @@
 'use client';
 
 import { use, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Breadcrumb, type BreadcrumbItem } from '@/app/components/layout/breadcrumb';
 import { CategoryHeader } from '@/app/components/layout/category-header';
 import ProductActionsBar from '@/app/components/layout/product-actions/ProductActionsBar';
 import { ProductGrid, LoadMoreButton } from '@/app/components/layout/product-grid';
 import { useProducts } from '@/lib/hooks/useProducts';
+import { useFilteredProducts } from '@/lib/hooks/useFilteredProducts';
 import { getCollectionTitle, getCollectionType, getCollectionMaterialSlug } from '@/lib/utils/url-mapping';
+import { RootState } from '@/lib/redux/store';
 import type { SortOption } from '@/types/product';
 
 interface CollectionPageProps {
@@ -20,13 +23,41 @@ export default function CollectionPage({ params }: CollectionPageProps) {
   const lockedMaterialSlug = getCollectionMaterialSlug(slug);
   const [sortBy, setSortBy] = useState<SortOption>('date');
 
-  const { products, meta, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useProducts({
-      slug,
-      type: collectionType,
-      per_page: 12,
-      sortBy
-    });
+  // Get filter state from Redux
+  const selectedMaterials = useSelector((state: RootState) => state.productFilter.selectedMaterials);
+  const selectedUsageAreas = useSelector((state: RootState) => state.productFilter.selectedUsageAreas);
+  const selectedColours = useSelector((state: RootState) => state.productFilter.selectedColours);
+  const selectedFinishes = useSelector((state: RootState) => state.productFilter.selectedFinishes);
+
+  // Check if any filters are active (excluding locked material)
+  const hasActiveFilters =
+    selectedUsageAreas.length > 0 ||
+    selectedColours.length > 0 ||
+    selectedFinishes.length > 0 ||
+    (selectedMaterials.length > 0 && !lockedMaterialSlug);
+
+  // Use filtered products when filters are active
+  const filteredProductsQuery = useFilteredProducts({
+    material: selectedMaterials,
+    roomTypeUsage: selectedUsageAreas,
+    colour: selectedColours,
+    finish: selectedFinishes,
+    per_page: 12,
+    sortBy,
+  });
+
+  // Use regular products when no filters are active
+  const regularProductsQuery = useProducts({
+    slug,
+    type: collectionType,
+    per_page: 12,
+    sortBy,
+  });
+
+  // Choose which query to use based on active filters
+  const { products, meta, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = hasActiveFilters
+    ? filteredProductsQuery
+    : regularProductsQuery;
 
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: 'Home', href: '/' },

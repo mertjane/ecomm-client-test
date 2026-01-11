@@ -3,10 +3,16 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/lib/redux/store';
 import { toggleFilterSidebar } from '@/lib/redux/slices/filterSidebarSlice';
+import {
+  toggleMaterial,
+  toggleUsageArea,
+  toggleColour,
+  toggleFinish,
+  clearFilters,
+} from '@/lib/redux/slices/productFilterSlice';
 import { X } from 'lucide-react';
 import { SidebarContent } from './SidebarContent';
 import { useFilterOptions } from '@/lib/hooks/useFilterOptions';
-import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { getCollectionMaterialSlug } from '@/lib/utils/url-mapping';
 
@@ -15,6 +21,12 @@ export function FilterSidebar() {
   const isOpen = useSelector((state: RootState) => state.filterSidebar.isOpen);
   const { filterOptions, isLoading } = useFilterOptions();
   const pathname = usePathname();
+
+  // Get filter state from Redux
+  const selectedMaterials = useSelector((state: RootState) => state.productFilter.selectedMaterials);
+  const selectedUsageAreas = useSelector((state: RootState) => state.productFilter.selectedUsageAreas);
+  const selectedColours = useSelector((state: RootState) => state.productFilter.selectedColours);
+  const selectedFinishes = useSelector((state: RootState) => state.productFilter.selectedFinishes);
 
   // Detect locked material slug from URL
   const lockedMaterialSlug = (() => {
@@ -38,69 +50,35 @@ export function FilterSidebar() {
     option => option.slug !== 'porcelain-stone'
   );
 
-  // Filter states
-  const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
-  const [selectedUsageAreas, setSelectedUsageAreas] = useState<string[]>([]);
-  const [selectedColours, setSelectedColours] = useState<string[]>([]);
-  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
-
-  // Update selected materials when locked material slug changes (page navigation)
-  useEffect(() => {
-    if (lockedMaterialSlug) {
-      setSelectedMaterials([lockedMaterialSlug]);
-    } else {
-      setSelectedMaterials([]);
-    }
-  }, [lockedMaterialSlug]);
-
   const closeSidebar = () => {
     dispatch(toggleFilterSidebar());
   };
 
   const handleClearFilters = () => {
-    // Don't clear locked material filter
-    if (!lockedMaterialSlug) {
-      setSelectedMaterials([]);
-    }
-    setSelectedUsageAreas([]);
-    setSelectedColours([]);
-    setSelectedFinishes([]);
+    // Keep locked material when clearing
+    dispatch(clearFilters({ keepMaterials: !!lockedMaterialSlug }));
   };
 
   const handleApplyFilters = () => {
-    // TODO: Apply filters to product list
-    console.log('Applying filters:', {
-      materials: selectedMaterials,
-      usageAreas: selectedUsageAreas,
-      colours: selectedColours,
-      finishes: selectedFinishes,
-    });
+    // Close sidebar - filters are already applied via Redux
     closeSidebar();
   };
 
-  // Toggle handlers
-  const toggleMaterial = (slug: string) => {
-    setSelectedMaterials(prev =>
-      prev.includes(slug) ? prev.filter(s => s !== slug) : [...prev, slug]
-    );
+  // Toggle handlers dispatch to Redux
+  const handleToggleMaterial = (slug: string) => {
+    dispatch(toggleMaterial(slug));
   };
 
-  const toggleUsageArea = (slug: string) => {
-    setSelectedUsageAreas(prev =>
-      prev.includes(slug) ? prev.filter(s => s !== slug) : [...prev, slug]
-    );
+  const handleToggleUsageArea = (slug: string) => {
+    dispatch(toggleUsageArea(slug));
   };
 
-  const toggleColour = (slug: string) => {
-    setSelectedColours(prev =>
-      prev.includes(slug) ? prev.filter(s => s !== slug) : [...prev, slug]
-    );
+  const handleToggleColour = (slug: string) => {
+    dispatch(toggleColour(slug));
   };
 
-  const toggleFinish = (slug: string) => {
-    setSelectedFinishes(prev =>
-      prev.includes(slug) ? prev.filter(s => s !== slug) : [...prev, slug]
-    );
+  const handleToggleFinish = (slug: string) => {
+    dispatch(toggleFinish(slug));
   };
 
   return (
@@ -141,10 +119,10 @@ export function FilterSidebar() {
             selectedUsageAreas={selectedUsageAreas}
             selectedColours={selectedColours}
             selectedFinishes={selectedFinishes}
-            onToggleMaterial={toggleMaterial}
-            onToggleUsageArea={toggleUsageArea}
-            onToggleColour={toggleColour}
-            onToggleFinish={toggleFinish}
+            onToggleMaterial={handleToggleMaterial}
+            onToggleUsageArea={handleToggleUsageArea}
+            onToggleColour={handleToggleColour}
+            onToggleFinish={handleToggleFinish}
             lockedMaterialSlug={lockedMaterialSlug}
           />
         </div>

@@ -14,11 +14,12 @@ export function Logo() {
       <Image
         src="/logos/Authentic-Stone_Long-Strapline-Logo_dark.png"
         alt="Authentic Stone"
-        width={1000}
-        height={200}
+        width={2000}
+        height={2000}
+        className="object-cover"
         priority
         // Increased width from 600px to 800px or similar
-        style={{ width: '500px', height: 'auto', maxWidth: 'none' }}
+        style={{ width: '400px', height: '80px', maxWidth: 'none' }}
       />
     </Link>
   );

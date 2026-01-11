@@ -50,7 +50,7 @@ export function Search() {
       {/* Search Panel - Dropdown from top */}
       <div
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 bg-background shadow-2xl transition-transform duration-500 ease-out flex flex-col',
+          'fixed top-0 left-0 right-0 z-60 bg-background shadow-2xl transition-transform duration-500 ease-out flex flex-col',
           'max-h-[95vh] sm:max-h-[90vh]',
           isOpen ? 'translate-y-0' : '-translate-y-full'
         )}

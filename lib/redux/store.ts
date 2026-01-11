@@ -6,6 +6,7 @@ import searchReducer from './slices/searchSlice';
 import authReducer from './slices/authSlice';
 import quickViewReducer from './slices/quickViewSlice';
 import filterSidebarReducer from './slices/filterSidebarSlice';
+import productFilterReducer from './slices/productFilterSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -17,6 +18,7 @@ export const makeStore = () => {
       auth: authReducer,
       quickView: quickViewReducer,
       filterSidebar: filterSidebarReducer,
+      productFilter: productFilterReducer,
     },
   });
 };

@@ -42,10 +42,10 @@ export function HeaderActions() {
         variant="ghost"
         size="icon"
         onClick={handleAccountClick}
-        className="h-10 w-10 rounded-full hover:bg-muted/80 transition-colors"
+        className="h-10 w-10 rounded-full hover:bg-muted/80 transition-colors relative z-50"
         aria-label="Account"
       >
-        <User className="h-5 w-5" strokeWidth={1.5} />
+        <User className="h-6 w-6" strokeWidth={1.5} />
       </Button>
 
       {/* Cart Button */}
@@ -56,7 +56,7 @@ export function HeaderActions() {
         aria-label="Shopping cart"
         onClick={handleCartClick}
       >
-        <ShoppingCart className="h-5 w-5" strokeWidth={1.5} />
+        <ShoppingCart className="h-6 w-6" strokeWidth={1.5} />
         {itemCount > 0 && (
           <Badge
             variant="destructive"
@@ -76,7 +76,7 @@ export function HeaderActions() {
             className="h-10 w-10 rounded-full hover:bg-muted/80 transition-colors lg:hidden relative z-50"
             aria-label="Menu"
           >
-            <Menu className="h-6 w-6" strokeWidth={1.5} />
+            <Menu className="h-7 w-7" strokeWidth={1.5} />
           </Button>
         </SheetTrigger>
         {/* Adjusted width and removed default padding for better control */}

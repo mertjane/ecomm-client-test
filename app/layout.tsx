@@ -10,6 +10,7 @@ import { FilterSidebar } from "./components/layout/filterSidebar";
 //import { CartDevTools } from "./components/dev/CartDevTools";
 import { Providers } from "./providers/Providers";
 import Footer from "./components/layout/footer/Footer";
+import CookieConsent from "./components/layout/ CookieConsent";
 
 const sen = Sen({
   subsets: ['latin'],
@@ -49,6 +50,7 @@ export default function RootLayout({
           <QuickViewSidebar />
           <FilterSidebar />
           <Footer />
+          <CookieConsent />
         </Providers>
       </body>
     </html>

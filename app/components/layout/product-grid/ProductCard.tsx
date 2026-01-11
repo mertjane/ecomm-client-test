@@ -13,7 +13,7 @@ interface ProductCardProps {
   priority?: boolean;
 }
 
-export function ProductCard({ product, priority = false}: ProductCardProps) {
+export function ProductCard({ product, priority = false }: ProductCardProps) {
   const dispatch = useAppDispatch();
 
   const imageSrc =
@@ -45,22 +45,22 @@ export function ProductCard({ product, priority = false}: ProductCardProps) {
     console.log('Order sample:', product.slug);
   };
 
-const isTile = Array.isArray(product.attributes)
-  ? product.attributes.some(attr =>
+  const isTile = Array.isArray(product.attributes)
+    ? product.attributes.some(attr =>
       attr.slug === 'pa_material' &&
       Array.isArray(attr.options) &&
       attr.options.some(opt =>
-        ['marble','travertine','limestone','mosaic','granite']
+        ['marble', 'travertine', 'limestone', 'mosaic', 'granite']
           .some(v => opt?.toLowerCase()?.includes(v))
       )
     )
-  : false;
+    : false;
 
 
 
 
-console.log('Is this a tile?', isTile);
-  
+  console.log('Is this a tile?', isTile);
+
 
   return (
     <div className="group bg-card border border-border hover:shadow-lg transition-all duration-300">
@@ -89,24 +89,64 @@ console.log('Is this a tile?', isTile);
           </div>
         )}
 
-        {/* Hover Overlay with Action Buttons */}
+        {/* ============================================== */}
+        {/* 1. DESKTOP HOVER OVERLAY (Hidden on Mobile)    */}
+        {/* ============================================== */}
         {product.stock_status !== 'outofstock' && (
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 z-10">
+          <div className="hidden md:flex absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center gap-3 z-10">
             <button
-              onClick={handleQuickView}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation(); // Critical to prevent opening product page
+                handleQuickView(e);
+              }}
               className="bg-white hover:bg-emperador text-foreground hover:text-white p-3 rounded-full transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 shadow-lg"
               aria-label="Quick view"
-              title='Quick View'
+              title="Quick View"
             >
               <Eye className="w-5 h-5" />
             </button>
             <button
-              onClick={handleOrderSample}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleOrderSample(e);
+              }}
               className="bg-white hover:bg-emperador text-foreground hover:text-white p-3 rounded-full transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 delay-75 shadow-lg"
               aria-label="Order sample"
-              title='Order sample'
+              title="Order sample"
             >
               <Package className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
+        {/* ============================================== */}
+        {/* 2. MOBILE FLOATING BUTTONS (Hidden on Desktop) */}
+        {/* ============================================== */}
+        {product.stock_status !== 'outofstock' && (
+          <div className="md:hidden absolute bottom-3 right-3 flex gap-2 z-20">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleQuickView(e);
+              }}
+              className="bg-white/90 text-foreground border border-black/10 p-2 rounded-full shadow-md active:scale-95 transition-transform"
+              aria-label="Quick view"
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleOrderSample(e);
+              }}
+              className="bg-white/90 text-foreground border border-black/10 p-2 rounded-full shadow-md active:scale-95 transition-transform"
+              aria-label="Order sample"
+            >
+              <Package className="w-4 h-4" />
             </button>
           </div>
         )}
@@ -138,21 +178,21 @@ console.log('Is this a tile?', isTile);
         {/* Price Section */}
         <div className="flex items-center">
           <span className="text-emperador  mr-2">FROM</span>
-          
+
           {priceHtml ? (
             <div className="flex items-baseline gap-1">
               {/* Price Number */}
-            
+
               £
               <div
                 className="text-foreground font-medium"
                 dangerouslySetInnerHTML={{ __html: priceHtml }}
               />
-              
+
               {/* Unit Suffix */}
               {isTile && (
                 <span className="text-sm text-muted-foreground font-normal">
-                  / m²
+                  / M²
                 </span>
               )}
             </div>
@@ -162,7 +202,7 @@ console.log('Is this a tile?', isTile);
         </div>
       </Link>
     </div>
-      
-    
+
+
   );
 }
