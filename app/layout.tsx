@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Sen } from 'next/font/google';
 import { Lora } from 'next/font/google';
 import "./globals.css";
@@ -25,11 +25,28 @@ const lora = Lora({
   display: 'swap',
 });
 
+// Safari 15.3 requires explicit viewport settings to prevent rendering bugs
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5, // Allows accessibility zooming
+  viewportFit: 'cover', // Fixes display around the "notch"
+  themeColor: '#f2f2f2',
+};
+
 
 
 export const metadata: Metadata = {
   title: "Authentic Stone | Premium Stone Tiles & Custom Stone Projects",
   description: "Leading UK importer of natural stone tiles since 2007",
+  appleWebApp: {
+    capable: true,
+    title: "Authentic Stone",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false, // Prevents Safari from auto-linking numbers if unwanted
+  },
 };
 
 export default function RootLayout({
@@ -40,7 +57,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${sen.variable} ${lora.variable}min-h-screen antialiased`}>
+        className={`${sen.variable} ${lora.variable} min-h-screen antialiased`}>
 
         <Providers>
           <Header />
