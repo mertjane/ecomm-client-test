@@ -32,7 +32,7 @@ const transformProductToSpecialDeal = (product: WooCommerceProduct): SpecialDeal
     id: product.id.toString(),
     title: product.name,
     category: product.categories?.[0]?.name,
-    image: product.images?.[0]?.src || product.yoast_head_json?.og_image?.[0]?.url || PLACEHOLDER_IMAGE,
+    images: product.images?.length ? product.images : [{ id: 0, src: PLACEHOLDER_IMAGE, alt: product.name }],
     link: `/products/${product.slug}`,
     originalPrice: parseFloat(originalPrice.toFixed(2)),
     discountPrice: parseFloat(discountPrice.toFixed(2)),

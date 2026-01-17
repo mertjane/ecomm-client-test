@@ -9,6 +9,8 @@ import { parsePriceFromHtml } from '@/lib/utils/price';
 import { quantityToSqm, sqmToQuantity, getMinSqmIncrement } from '@/lib/utils/calculation';
 import { fetchProductVariations, type ProductVariation } from '@/lib/api/variations';
 import Image from 'next/image';
+import CustomCutModal from '../../modals/CustomCutModal';
+import CustomCutTrigger from '../custom-cut-trigger/CustomCutTrigger';
 
 export function QuickViewSidebar() {
   const dispatch = useAppDispatch();
@@ -448,7 +450,7 @@ export function QuickViewSidebar() {
                 </div>
 
                 {/* SQM Input - Hidden for samples */}
-                {!isSampleVariation && (
+                {!isSampleVariation && ( 
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground block">
                       SQM
@@ -500,93 +502,14 @@ export function QuickViewSidebar() {
                 )}
               </button>
               {/* CUSTOM CUT TRIGGER SECTION */}
-              <div
-                onClick={() => setIsCustomCutOpen(true)}
-                className="w-full border border-dashed border-emperador/30 bg-emperador/5 rounded-lg p-4 cursor-pointer hover:bg-emperador/10 transition-colors group"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0 bg-white p-2.5 rounded-full shadow-sm border border-emperador/10 group-hover:scale-110 transition-transform">
-                    <div className="relative">
-
-                      <PencilRuler className="w-5 h-5 text-emperador relative z-10" />
-
-                    </div>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-emperador tracking-wider uppercase">Can't find your size?</span>
-                    <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors">We can cut any sizes</span>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-emperador/50 ml-auto group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-
+              <CustomCutTrigger setIsOpen={setIsCustomCutOpen} />
             </div>
           </div>
         </div>
       </div>
 
-      {/* CUSTOM CUT MODAL  */}
-      {/* Note: Z-index set to 60 to appear above the Sidebar (z-50) */}
-      <div
-        className={`fixed inset-0 z-[60] flex items-center justify-center p-4 transition-all duration-300 ${isCustomCutOpen ? 'visible opacity-100' : 'invisible opacity-0'
-          }`}
-      >
-        {/* Modal Backdrop */}
-        <div
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-          onClick={() => setIsCustomCutOpen(false)}
-        />
-
-        {/* Modal Content */}
-        <div
-          className={`relative bg-white w-full max-w-lg rounded-xl shadow-2xl p-6 md:p-8 transform transition-all duration-300 ${isCustomCutOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
-            }`}
-        >
-          <button
-            onClick={() => setIsCustomCutOpen(false)}
-            className="absolute top-4 right-4 p-2 hover:bg-muted rounded-full transition-colors"
-          >
-            <X className="w-5 h-5 text-muted-foreground" />
-          </button>
-
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center bg-emperador/10 p-3 rounded-full mb-4">
-              <Ruler className="w-8 h-8 text-emperador" />
-            </div>
-            <h3 className="text-2xl font-bold text-emperador mb-2">Custom Cutting Service</h3>
-            <p className="text-muted-foreground text-sm">
-              Need a specific size that isn't listed? We offer bespoke cutting services for all our natural stone products.
-            </p>
-          </div>
-
-          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); /* Handle submit logic */ setIsCustomCutOpen(false); }}>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Width (mm)</label>
-                <input type="number" placeholder="e.g. 600" className="w-full h-10 px-3 border border-border rounded-md focus:ring-1 focus:ring-emperador focus:border-emperador outline-none" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Length (mm)</label>
-                <input type="number" placeholder="e.g. 900" className="w-full h-10 px-3 border border-border rounded-md focus:ring-1 focus:ring-emperador focus:border-emperador outline-none" />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Quantity Required</label>
-              <input type="number" placeholder="Total tiles needed" className="w-full h-10 px-3 border border-border rounded-md focus:ring-1 focus:ring-emperador focus:border-emperador outline-none" />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Email Address</label>
-              <input type="email" placeholder="your@email.com" required className="w-full h-10 px-3 border border-border rounded-md focus:ring-1 focus:ring-emperador focus:border-emperador outline-none" />
-            </div>
-
-            <button type="submit" className="w-full bg-emperador hover:bg-emperador/90 text-white font-semibold py-3 rounded-md transition-colors mt-4">
-              Request Quote
-            </button>
-          </form>
-        </div>
-      </div>
+      {/* Custom Cut Modal Section */}
+      <CustomCutModal isOpen={isCustomCutOpen} setIsOpen={setIsCustomCutOpen} />
     </>
   );
 }

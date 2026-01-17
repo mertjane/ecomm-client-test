@@ -2,11 +2,14 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion, AnimatePresence } from "motion/react"; 
 import { Eye, Package } from 'lucide-react';
 import { useAppDispatch } from '@/lib/redux/hooks';
 import { openQuickView } from '@/lib/redux/slices/quickViewSlice';
+import { setSelectedProduct } from '@/lib/redux/slices/selectedProductSlice';
 import { PLACEHOLDER_IMAGE } from '@/lib/constants/images';
 import type { Product } from '@/types/product';
+import { useState } from 'react';
 
 interface ProductCardProps {
   product: Product;
@@ -15,6 +18,9 @@ interface ProductCardProps {
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const dispatch = useAppDispatch();
+
+  const [isHovered, setIsHovered] = useState(false);
+  const [isOrderHovered, setIsOrderHovered] = useState(false);
 
   const imageSrc =
     product.images?.[0]?.src ||
@@ -45,6 +51,10 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     console.log('Order sample:', product.slug);
   };
 
+  const handleProductClick = () => {
+    dispatch(setSelectedProduct(product));
+  };
+
   const isTile = Array.isArray(product.attributes)
     ? product.attributes.some(attr =>
       attr.slug === 'pa_material' &&
@@ -56,17 +66,18 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     )
     : false;
 
-
-
-
   console.log('Is this a tile?', isTile);
+
+
 
 
   return (
     <div className="group bg-card border border-border hover:shadow-lg transition-all duration-300">
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-muted">
-        <Link href={`/products/${product.slug}`} className="block h-full w-full">
+        <Link href={`/product/${product.slug}`}
+          onClick={handleProductClick}
+          className="block h-full w-full" >
           <Image
             src={imageSrc}
             alt={imageAlt}
@@ -94,60 +105,118 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         {/* ============================================== */}
         {product.stock_status !== 'outofstock' && (
           <div className="hidden md:flex absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center gap-3 z-10">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation(); // Critical to prevent opening product page
-                handleQuickView(e);
-              }}
-              className="bg-white hover:bg-emperador text-foreground hover:text-white p-3 rounded-full transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 shadow-lg"
-              aria-label="Quick view"
-              title="Quick View"
-            >
-              <Eye className="w-5 h-5" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleOrderSample(e);
-              }}
-              className="bg-white hover:bg-emperador text-foreground hover:text-white p-3 rounded-full transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 delay-75 shadow-lg"
-              aria-label="Order sample"
-              title="Order sample"
-            >
-              <Package className="w-5 h-5" />
-            </button>
+            
+            {/* WRAPPER: Handles the "Slide Up" CSS animation separately */}
+            <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">
+              <motion.button
+                layout
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleQuickView(e);
+                }}
+                onHoverStart={() => setIsHovered(true)}
+                onHoverEnd={() => setIsHovered(false)}
+                // REMOVED: transform, translate, transition classes from here
+                className="bg-white text-foreground h-10 px-3 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-emperador hover:text-white overflow-hidden"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {isHovered ? (
+                    <motion.span
+                      key="text"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      className="text-sm font-medium whitespace-nowrap"
+                    >
+                      Quick View
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="icon"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                    >
+                      <Eye className="w-5 h-5" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            </div>
+
+           {/* --- ORDER SAMPLE BUTTON --- */}
+            <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-100">
+              <motion.button
+                layout
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleOrderSample(e);
+                }}
+                onHoverStart={() => setIsOrderHovered(true)}
+                onHoverEnd={() => setIsOrderHovered(false)}
+                className="bg-white text-foreground h-10 px-3 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-emperador hover:text-white overflow-hidden"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {isOrderHovered ? (
+                    <motion.span
+                      key="os-text"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      className="text-sm font-medium whitespace-nowrap"
+                    >
+                      Order Sample
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="os-icon"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                    >
+                      <Package className="w-5 h-5" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            </div>
+
           </div>
         )}
 
         {/* ============================================== */}
-        {/* 2. MOBILE FLOATING BUTTONS (Hidden on Desktop) */}
+        {/* 2. MOBILE ACTION BAR (Hidden on Desktop)       */}
         {/* ============================================== */}
         {product.stock_status !== 'outofstock' && (
-          <div className="md:hidden absolute bottom-3 right-3 flex gap-2 z-20">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleQuickView(e);
-              }}
-              className="bg-white/90 text-foreground border border-black/10 p-2 rounded-full shadow-md active:scale-95 transition-transform"
-              aria-label="Quick view"
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleOrderSample(e);
-              }}
-              className="bg-white/90 text-foreground border border-black/10 p-2 rounded-full shadow-md active:scale-95 transition-transform"
-              aria-label="Order sample"
-            >
-              <Package className="w-4 h-4" />
-            </button>
+          <div className="md:hidden absolute bottom-0 left-0 right-0 z-20">
+            <div className="flex">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleQuickView(e);
+                }}
+                className="flex-1 bg-white/50 backdrop-blur-sm text-emperador py-2.5 flex items-center justify-center gap-2 border-t border-r border-border active:bg-muted transition-colors"
+              >
+                <Eye className="w-4 h-4" />
+                <span className="text-xs font-medium uppercase tracking-wide">Quick View</span>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleOrderSample(e);
+                }}
+                className="flex-1 bg-white/50 backdrop-blur-sm text-emperador py-2.5 flex items-center justify-center gap-2 border-t border-border active:bg-muted transition-colors"
+              >
+                <Package className="w-4 h-4" />
+                <span className="text-xs font-medium uppercase tracking-wide">Order Sample</span>
+              </button>
+            </div>
           </div>
         )}
 
@@ -162,7 +231,9 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       </div>
 
       {/* Product Info */}
-      <Link href={`/products/${product.slug}`} className="block p-4 no-underline">
+      <Link href={`/product/${product.slug}`}
+        onClick={handleProductClick}
+        className="block p-4 no-underline">
         {/* Category */}
         {product.categories?.[0] && (
           <p className="text-xs text-muted-foreground uppercase tracking-widest mb-2 subheading">

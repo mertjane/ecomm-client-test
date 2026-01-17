@@ -24,7 +24,7 @@ export interface SpecialDeal {
   id: string;
   title: string;
   category?: string;
-  image: string;
+  images: Array<{ id: number; src: string; alt: string }>;
   link: string;
   originalPrice: number;
   discountPrice: number;

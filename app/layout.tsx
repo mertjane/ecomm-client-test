@@ -10,7 +10,7 @@ import { FilterSidebar } from "./components/layout/filterSidebar";
 //import { CartDevTools } from "./components/dev/CartDevTools";
 import { Providers } from "./providers/Providers";
 import Footer from "./components/layout/footer/Footer";
-import CookieConsent from "./components/layout/ CookieConsent";
+import CookieConsent from "./components/layout/cookie-consent";
 
 const sen = Sen({
   subsets: ['latin'],

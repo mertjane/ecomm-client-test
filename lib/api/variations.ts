@@ -10,6 +10,7 @@ export interface ProductVariation {
   price: string;
   regular_price: string;
   sale_price: string;
+  name: string;
   price_html: string;
   on_sale: boolean;
   purchasable: boolean;

@@ -110,7 +110,7 @@ const categorySection: CategoryGridSection = {
 
 export default function Home() {
   return (
-    <div className=" mx-auto">
+    <div className="mx-auto">
       <Hero slides={heroSlides} autoPlay interval={6000} />
       <CategoryGrid section={categorySection} />
       <SpecialDealsSection

@@ -57,6 +57,7 @@
 :root {
   --radius: 0.5rem;
   
+  
   /* Authentic Stone Brand Colors */
   --granite: oklch(0.31 0.02 65);
   --emperador: oklch(0.48 0.02 65);

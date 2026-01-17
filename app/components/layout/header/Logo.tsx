@@ -4,8 +4,8 @@ import Image from "next/image";
 
 export function Logo() {
   return (
-    <Link 
-      href="/" 
+    <Link
+      href="/"
       // We use scale-125 or scale-150 to make it bigger visually 
       // without affecting the header's height.
       className="block cursor-pointer"
@@ -14,12 +14,13 @@ export function Logo() {
       <Image
         src="/logos/Authentic-Stone_Long-Strapline-Logo_dark.png"
         alt="Authentic Stone"
-        width={2000}
-        height={2000}
+        width={1200}
+        height={200}
         className="object-cover"
         priority
+        unoptimized
         // Increased width from 600px to 800px or similar
-        style={{ width: '400px', height: '80px', maxWidth: 'none' }}
+        style={{ width: '500px', height: '80px', maxWidth: 'none' }}
       />
     </Link>
   );

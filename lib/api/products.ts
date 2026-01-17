@@ -1,5 +1,5 @@
 import { apiClient } from './axios';
-import type { ProductResponse } from '@/types/product';
+import type { Product, ProductResponse } from '@/types/product';
 
 /**
  * Fetches products by category slug with sorting
@@ -28,6 +28,33 @@ export const getProductsByCategory = async (
   const { data } = await apiClient.get<ProductResponse>(
     endpoint,
     { params: { page, per_page: perPage, orderby, order } }
+  );
+  return data;
+};
+
+/**
+ * Fetches a single product by slug
+ * @param slug - The product slug
+ * @returns Promise resolving to the Product
+ */
+export const getProductBySlug = async (slug: string): Promise<Product> => {
+  const { data } = await apiClient.get<{ product: Product }>(`/api/products/slug/${slug}`);
+  return data.product;
+};
+
+/**
+ * Fetches new arrival products (from last 2 months)
+ * @param page - Page number
+ * @param perPage - Items per page
+ * @returns Promise resolving to ProductResponse (without category)
+ */
+export const getNewArrivals = async (
+  page: number = 1,
+  perPage: number = 12
+): Promise<Omit<ProductResponse, 'category'>> => {
+  const { data } = await apiClient.get<Omit<ProductResponse, 'category'>>(
+    '/api/products/new-arrivals',
+    { params: { page, per_page: perPage } }
   );
   return data;
 };

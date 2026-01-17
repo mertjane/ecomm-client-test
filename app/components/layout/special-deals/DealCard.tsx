@@ -1,4 +1,4 @@
-// app/components/layout/special-deals/DealCard.tsx
+
 'use client';
 
 import Image from 'next/image';
@@ -7,7 +7,11 @@ import { cn } from '@/lib/utils';
 import { Tag, TrendingDown } from 'lucide-react';
 import { DealTimer } from './DealTimer';
 import { DealBadge } from './DealBadge';
+import { useAppDispatch } from '@/lib/redux/hooks';
+import { setSelectedProduct } from '@/lib/redux/slices/selectedProductSlice';
 import type { SpecialDeal } from '@/types/special-deals';
+import type { Product } from '@/types/product';
+
 
 interface DealCardProps {
   deal: SpecialDeal;
@@ -15,13 +19,47 @@ interface DealCardProps {
 }
 
 export function DealCard({ deal, index }: DealCardProps) {
+  const dispatch = useAppDispatch();
+
   const discountPercentage = Math.round(
     ((deal.originalPrice - deal.discountPrice) / deal.originalPrice) * 100
   );
 
+  const images = deal.images ?? [];
+  const imageSrc = images[0]?.src || '/placeholder.png';
+
+  const slug = deal.title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+
+  // Transform SpecialDeal to Product format for SingleProductPage
+  const productForStore: Product = {
+    id: Number(deal.id),
+    name: deal.title,
+    slug: slug,
+    permalink: deal.link,
+    price: String(deal.discountPrice),
+    regular_price: String(deal.originalPrice),
+    sale_price: String(deal.discountPrice),
+    price_html: `${deal.discountPrice.toFixed(2)}`,
+    stock_status: deal.stock && deal.stock > 0 ? 'instock' : 'outofstock',
+    categories: deal.category ? [{ id: 0, name: deal.category, slug: deal.category.toLowerCase() }] : [],
+    images: images.map(img => ({ ...img, name: img.alt || deal.title })),
+    attributes: [],
+    variations: [],
+    yoast_head_json: { og_image: images.map(img => ({ url: img.src, width: 0, height: 0, type: '' })) }
+  };
+
+  const handleClick = () => {
+    dispatch(setSelectedProduct(productForStore));
+  };
+
   return (
     <Link
-      href={deal.link}
+      href={`/product/${slug}`}
+      onClick={handleClick}
       className={cn(
         'group relative bg-card rounded-lg overflow-hidden',
         'border border-border transition-all duration-500',
@@ -42,7 +80,7 @@ export function DealCard({ deal, index }: DealCardProps) {
       {/* Product Image */}
       <div className="relative w-full aspect-square bg-muted overflow-hidden">
         <Image
-          src={deal.image}
+          src={imageSrc}
           alt={deal.title}
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-110"
