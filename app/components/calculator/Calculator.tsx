@@ -10,6 +10,7 @@ interface CalculatorProps {
     sqm: number;
     handleQuantityChange: (value: string) => void;
     handleSqmChange: (value: string) => void;
+    handleSqmBlur: () => void;
     incrementQuantity: () => void;
     decrementQuantity: () => void;
     incrementSqm: () => void;
@@ -23,6 +24,7 @@ const Calculator = ({
     sqm,
     handleQuantityChange,
     handleSqmChange,
+    handleSqmBlur,
     incrementQuantity,
     decrementQuantity,
     incrementSqm,
@@ -40,6 +42,7 @@ const Calculator = ({
                 <SqmInput
                     sqm={sqm}
                     handleSqmChange={handleSqmChange}
+                    handleSqmBlur={handleSqmBlur}
                     incrementSqm={incrementSqm}
                     decrementSqm={decrementSqm}
                 />

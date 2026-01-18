@@ -39,6 +39,7 @@ const SingleProductPage = () => {
     const [showDeliveryEstimate, setShowDeliveryEstimate] = useState<boolean>(false);
 
     // Quantity and SQM state
+    const [baseQuantity, setBaseQuantity] = useState<number>(0);
     const [quantity, setQuantity] = useState<number>(0);
     const [sqm, setSqm] = useState<number>(0);
     const [addWastage, setAddWastage] = useState<boolean>(false);
@@ -95,7 +96,17 @@ const SingleProductPage = () => {
         fetchData();
     }, [product?.id]);
 
-    console.log("Fetched variations data:", variations);
+    // console.log("Fetched variations data:", variations);
+
+    // --- HELPER: Get Area of a single tile in Meters ---
+    const getTileAreaInMeters = (variationName: string): number | null => {
+        const dims = extractDimensions(variationName);
+        if (!dims) return null;
+        const [width, length] = dims;
+        // Assuming width/length from extractDimensions are in mm. 
+        // 1,000,000 mm^2 = 1 m^2
+        return (width * length) / 1_000_000;
+    }
 
     // Handle tile calculator - calculates area and updates sqm/quantity
     const handleCalculateArea = () => {
@@ -108,13 +119,39 @@ const SingleProductPage = () => {
         const calculatedSqm = (areaWidth * areaLength) / 10000;
 
         if (calculatedSqm > 0) {
-            setSqm(parseFloat(calculatedSqm.toFixed(2)));
+            const tileArea = getTileAreaInMeters(selectedVariation.name);
+
+            if (tileArea) {
+                // 1. Calculate the raw tiles needed for the area (This is your BASE)
+                const neededBaseTiles = Math.ceil(calculatedSqm / tileArea);
+                
+                // 2. CRITICAL FIX: Update the Base Quantity state
+                setBaseQuantity(neededBaseTiles); 
+
+                // 3. Calculate Final Quantity (Apply wastage if the switch is already ON)
+                const finalQty = calculateTotalQuantity(neededBaseTiles, addWastage);
+                setQuantity(finalQty);
+
+                // 4. Calculate exact SQM based on the FINAL quantity
+                const exactSqm = finalQty * tileArea;
+                setSqm(parseFloat(exactSqm.toFixed(3))); 
+            } else {
+                // Fallback for non-standard variations
+                
+                // Calculate base quantity from the SQM logic
+                const baseQty = sqmToQuantity(calculatedSqm, selectedVariation.name);
+                setBaseQuantity(baseQty); // Fix: Update base
+
+                // Calculate final quantity based on wastage switch
+                const finalQty = calculateTotalQuantity(baseQty, addWastage);
+                setQuantity(finalQty);
+
+                // Set SQM (You might want to sync this to finalQty like above, but strictly:
+                setSqm(parseFloat(calculatedSqm.toFixed(3)));
+            }
+
             setHasChangedQuantity(true);
             setShowQuantityWarning(false);
-
-            // Update quantity based on sqm
-            const calculatedQuantity = sqmToQuantity(calculatedSqm, selectedVariation.name);
-            setQuantity(calculatedQuantity);
         }
     }
 
@@ -181,18 +218,23 @@ const SingleProductPage = () => {
         setSelectedVariation(variation);
         setShowSizeWarning(false);
 
-        // Check if the selected variation is a free sample
         const isFreeSample = variation.name.toLowerCase().includes('free sample');
 
         if (isFreeSample) {
-            // Reset quantity and sqm for free samples
             setQuantity(0);
             setSqm(0);
             setHasChangedQuantity(false);
         } else {
-            // Recalculate sqm when variation changes
-            const calculatedSqm = quantityToSqm(quantity, variation.name);
-            setSqm(calculatedSqm);
+            // Recalculate based on existing quantity if switching variation
+            // We prioritize quantity to keep the "number of tiles" logic consistent
+            const tileArea = getTileAreaInMeters(variation.name);
+            if (tileArea && quantity > 0) {
+                const newSqm = quantity * tileArea;
+                setSqm(parseFloat(newSqm.toFixed(3))); // 3 decimals
+            } else {
+                setSqm(0);
+                setQuantity(0);
+            }
         }
     }
 
@@ -240,6 +282,15 @@ const SingleProductPage = () => {
         setTimeout(() => setShowQuantityWarning(false), 3000);
     };
 
+    // --- UPDATED HANDLERS FOR CLIENT REQUEST ---
+
+    const calculateTotalQuantity = (base: number, isWastageOn: boolean) => {
+        if (isWastageOn) {
+            return Math.ceil(base * 1.1);
+        }
+        return base;
+    };
+
     // Handle quantity change
     const handleQuantityChange = (value: string) => {
         if (!selectedVariation && !isSampleVariation) {
@@ -247,36 +298,95 @@ const SingleProductPage = () => {
             return;
         }
 
-        const numValue = parseInt(value);
+        const numValue = parseInt(value); // This is the Total User Input
+
         if (!isNaN(numValue) && numValue >= 0) {
-            setQuantity(numValue);
+            // When user types in Quantity box, they are setting the FINAL amount.
+            // We need to reverse-engineer the Base quantity if wastage is on.
+
+            setQuantity(numValue); // Always update display immediately
+
+            let calculatedBase = numValue;
+            if (addWastage) {
+                // If wastage is ON, and user types 110, Base is roughly 100.
+                // We store this so if they turn wastage OFF later, it drops correctly.
+                calculatedBase = Math.ceil(numValue / 1.1);
+            }
+            setBaseQuantity(calculatedBase);
+
             setHasChangedQuantity(true);
             setShowQuantityWarning(false);
-            // Update sqm based on quantity
+
+            // Update SQM based on the displayed Quantity
             if (selectedVariation && !isSampleVariation) {
-                const calculatedSqm = quantityToSqm(numValue, selectedVariation.name);
-                setSqm(calculatedSqm);
+                const tileArea = getTileAreaInMeters(selectedVariation.name);
+                if (tileArea) {
+                    const exactSqm = numValue * tileArea;
+                    setSqm(parseFloat(exactSqm.toFixed(3)));
+                }
             }
+        } else if (value === "") {
+            setQuantity(0);
+            setBaseQuantity(0);
+            setSqm(0);
         }
     };
 
-    // Handle sqm change
+
     const handleSqmChange = (value: string) => {
         if (!selectedVariation) {
             triggerSizeWarning();
             return;
         }
 
-        const numValue = parseFloat(value);
-        if (!isNaN(numValue) && numValue >= 0) {
-            setSqm(numValue);
+        // Allow empty string so user can delete everything
+        if (value === "") {
+            setSqm(0); // or maintain it as string if you have a separate local state, but 0 works for number types usually
+            setQuantity(0);
+            setBaseQuantity(0);
+            return;
+        }
+
+        const inputValue = parseFloat(value);
+
+        // Update the SQM state immediately so the input reflects what they type
+        if (!isNaN(inputValue) && inputValue >= 0) {
+            setSqm(inputValue);
             setHasChangedQuantity(true);
             setShowQuantityWarning(false);
-            // Update quantity based on sqm
-            if (selectedVariation) {
-                const calculatedQuantity = sqmToQuantity(numValue, selectedVariation.name);
-                setQuantity(calculatedQuantity);
+
+            // OPTIONAL: You can update Quantity here roughly if you want them to see 
+            // the tile count update while they type, but WITHOUT snapping the SQM back.
+            const tileArea = getTileAreaInMeters(selectedVariation.name);
+            if (tileArea) {
+                const neededTiles = Math.ceil(inputValue / tileArea);
+                setQuantity(neededTiles); // Update quantity visual
+                setBaseQuantity(neededTiles); // Update base logic
+                // CRITICAL: DO NOT CALL setSqm() with the recalculated value here.
             }
+        }
+    };
+
+    const handleSqmBlur = () => {
+        if (!selectedVariation || sqm === 0) return;
+
+        const tileArea = getTileAreaInMeters(selectedVariation.name);
+
+        if (tileArea) {
+            // 1. Calculate how many whole tiles cover the CURRENT entered area
+            // We use the current 'sqm' state which the user just finished typing
+            const neededTiles = Math.ceil(sqm / tileArea);
+
+            // 2. Calculate the ACTUAL area those tiles cover
+            const exactSqm = neededTiles * tileArea;
+
+            // 3. Update states to the "Snapped" values
+            setBaseQuantity(neededTiles);
+            setQuantity(neededTiles); // Or calculateTotalQuantity(neededTiles, addWastage) if needed
+            setSqm(parseFloat(exactSqm.toFixed(3))); // NOW we force the 3 decimals
+        } else {
+            // Fallback: just ensure 3 decimals for non-tile products
+            setSqm(parseFloat(sqm.toFixed(3)));
         }
     };
 
@@ -292,8 +402,11 @@ const SingleProductPage = () => {
         setHasChangedQuantity(true);
         setShowQuantityWarning(false);
         if (selectedVariation && !isSampleVariation) {
-            const calculatedSqm = quantityToSqm(newQuantity, selectedVariation.name);
-            setSqm(calculatedSqm);
+            const tileArea = getTileAreaInMeters(selectedVariation.name);
+            if (tileArea) {
+                const exactSqm = newQuantity * tileArea;
+                setSqm(parseFloat(exactSqm.toFixed(3)));
+            }
         }
     };
 
@@ -307,62 +420,48 @@ const SingleProductPage = () => {
         setQuantity(newQuantity);
         setHasChangedQuantity(true);
         if (selectedVariation && !isSampleVariation) {
-            const calculatedSqm = quantityToSqm(newQuantity, selectedVariation.name);
-            setSqm(calculatedSqm);
+            const tileArea = getTileAreaInMeters(selectedVariation.name);
+            if (tileArea) {
+                const exactSqm = newQuantity * tileArea;
+                setSqm(parseFloat(exactSqm.toFixed(3)));
+            }
         }
     };
 
-    const incrementSqm = () => {
-        if (!selectedVariation) {
-            triggerSizeWarning();
-            return;
-        }
 
-        const increment = getMinSqmIncrement(selectedVariation.name);
-        const newSqm = parseFloat((sqm + increment).toFixed(2));
-        setSqm(newSqm);
-        setHasChangedQuantity(true);
-        setShowQuantityWarning(false);
 
-        const calculatedQuantity = sqmToQuantity(newSqm, selectedVariation.name);
-        setQuantity(calculatedQuantity);
-    };
-
-    const decrementSqm = () => {
-        if (!selectedVariation) {
-            triggerSizeWarning();
-            return;
-        }
-
-        const increment = getMinSqmIncrement(selectedVariation.name);
-        const newSqm = sqm > increment ? parseFloat((sqm - increment).toFixed(2)) : 0;
-        setSqm(newSqm);
-        setHasChangedQuantity(true);
-
-        const calculatedQuantity = sqmToQuantity(newSqm, selectedVariation.name);
-        setQuantity(calculatedQuantity);
-    };
-
-    // Handle wastage toggle - also updates quantity and sqm
+    // Handle wastage toggle - updates Quantity (add 10%), then recalculates SQM
     const handleWastageToggle = (checked: boolean) => {
         setAddWastage(checked);
 
-        if (!selectedVariation || !hasChangedQuantity) return;
+        if (!selectedVariation) return;
 
-        if (checked) {
-            // Add 10% wastage
-            const newSqm = parseFloat((sqm * 1.1).toFixed(2));
-            setSqm(newSqm);
-            const calculatedQuantity = sqmToQuantity(newSqm, selectedVariation.name);
-            setQuantity(calculatedQuantity);
-        } else {
-            // Remove 10% wastage (divide by 1.1 to get original)
-            const newSqm = parseFloat((sqm / 1.1).toFixed(2));
-            setSqm(newSqm);
-            const calculatedQuantity = sqmToQuantity(newSqm, selectedVariation.name);
-            setQuantity(calculatedQuantity);
+        // We use the anchors (baseQuantity) to recalculate. 
+        // We do NOT use 'quantity' to calculate the new 'quantity'.
+
+        const newTotalQty = calculateTotalQuantity(baseQuantity, checked);
+        setQuantity(newTotalQty);
+
+        // Update SQM to match the new Total
+        const tileArea = getTileAreaInMeters(selectedVariation.name);
+        if (tileArea) {
+            const newSqm = newTotalQty * tileArea;
+            setSqm(parseFloat(newSqm.toFixed(3)));
         }
     };
+
+    // Increment SQM (Increments by 1 full tile area now, or minimum increment)
+    const incrementSqm = () => {
+        const newQuantity = quantity + 1;
+        handleQuantityChange(newQuantity.toString());
+    };
+
+    const decrementSqm = () => {
+        const newQuantity = quantity > 0 ? quantity - 1 : 0;
+        handleQuantityChange(newQuantity.toString());
+    };
+
+
 
     // Handle add to cart click
     const handleAddToCart = () => {
@@ -493,6 +592,7 @@ const SingleProductPage = () => {
                             sqm={sqm}
                             handleQuantityChange={handleQuantityChange}
                             handleSqmChange={handleSqmChange}
+                            handleSqmBlur={handleSqmBlur}
                             incrementQuantity={incrementQuantity}
                             decrementQuantity={decrementQuantity}
                             incrementSqm={incrementSqm}
@@ -525,11 +625,11 @@ const SingleProductPage = () => {
 
                 {/* Tiling Products Carousel */}
                 {!isTilingProduct && <TilingProducts />}
-                
+
 
                 {/* May Also Like Section */}
                 <MayAlsoLikeSection product={product} slug={product?.categories?.[0]?.slug} />
-                                
+
                 {/* NewsLetter Section */}
                 <NewsletterSection />
             </div>
