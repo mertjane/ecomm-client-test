@@ -19,8 +19,6 @@ export function CategoryHeader({ title, description }: CategoryHeaderProps) {
               {description}
             </p>
           )}
-
-          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-emperador to-transparent mx-auto mt-6" />
         </div>
       </div>
     </div>

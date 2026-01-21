@@ -24,7 +24,7 @@ import { openCart } from "@/lib/redux/slices/cartSlice";
 export function HeaderActions() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { itemCount } = useAppSelector((state) => state.cart);
+  const { itemsCount } = useAppSelector((state) => state.cart);
   const [open, setOpen] = useState(false);
 
   const handleCartClick = () => {
@@ -57,12 +57,12 @@ export function HeaderActions() {
         onClick={handleCartClick}
       >
         <ShoppingCart className="h-6 w-6" strokeWidth={1.5} />
-        {itemCount > 0 && (
+        {itemsCount > 0 && (
           <Badge
             variant="destructive"
             className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] z-50"
           >
-            {itemCount}
+            {itemsCount}
           </Badge>
         )}
       </Button>

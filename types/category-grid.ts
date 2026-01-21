@@ -1,4 +1,4 @@
-// types/category-grid.ts
+
 export interface CategoryCard {
   id: string;
   title: string;

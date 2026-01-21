@@ -15,7 +15,7 @@ export function CategoryGrid({ section }: CategoryGridProps) {
       {(section.heading || section.subheading) && (
         <div className="text-center mb-12 lg:mb-16">
           {section.subheading && (
-            <p className="text-sm tracking-widest uppercase text-emperador mb-3 font-light">
+            <p className="text-sm tracking-widest uppercase text-muted-foreground mb-3 subheading">
               {section.subheading}
             </p>
           )}

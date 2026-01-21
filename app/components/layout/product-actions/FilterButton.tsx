@@ -4,6 +4,8 @@ import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { FilterOption } from '@/types/product';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 interface FilterButtonProps {
   label: string;
@@ -72,7 +74,7 @@ export function FilterButton({
               };
 
               return (
-                <label
+                <Label
                   key={option.id}
                   className={`flex items-center justify-between px-4 py-2.5 transition-colors ${
                     isLocked
@@ -81,23 +83,17 @@ export function FilterButton({
                   } ${isChecked && !isLocked ? 'bg-muted/30' : ''}`}
                 >
                   <div className="flex items-center gap-3 flex-1">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={isChecked}
-                      onChange={handleClick}
+                      onCheckedChange={handleClick}
                       disabled={isLocked}
-                      className={`h-4 w-4 rounded border-border focus:ring-emperador focus:ring-offset-0 ${
-                        isLocked
-                          ? 'text-emperador cursor-not-allowed opacity-60'
-                          : 'text-emperador'
-                      }`}
                     />
                     <span className={`text-sm ${isLocked ? 'text-emperador font-medium' : 'text-foreground'}`}>
                       {option.name}
                     </span>
                   </div>
                   <span className="text-xs text-muted-foreground ml-2">({option.count})</span>
-                </label>
+                </Label>
               );
             })}
           </div>

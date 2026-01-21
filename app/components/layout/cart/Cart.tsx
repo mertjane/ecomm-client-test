@@ -1,35 +1,46 @@
 'use client';
 
-import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
-import {
-  closeCart,
-  removeFromCart,
-  updateQuantity,
-  clearCart,
-} from '@/lib/redux/slices/cartSlice';
-import { X, Plus, Minus, ShoppingBag, Trash2 } from 'lucide-react';
+import { useCart } from '@/lib/hooks/useCart';
+import { X, Plus, Minus, ShoppingBag, Trash2, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { CartItem } from '@/types/cart';
 
 export function Cart() {
-  const dispatch = useAppDispatch();
-  const { items, isOpen, total, itemCount } = useAppSelector((state) => state.cart);
+  const {
+    items,
+    isOpen,
+    totals,
+    closeCart,
+    removeItem,
+    updateItem,
+    clearCart
+  } = useCart();
 
   const handleClose = () => {
-    dispatch(closeCart());
+    closeCart();
   };
 
-  const handleRemove = (id: number) => {
-    dispatch(removeFromCart(id));
+  const handleRemove = async (key: string) => {
+    await removeItem(key);
   };
 
-  const handleUpdateQuantity = (id: number, quantity: number) => {
-    dispatch(updateQuantity({ id, quantity }));
+  // Logic to handle tile quantity/SQM updates
+  const handleUpdateQuantity = async (item: CartItem, change: number) => {
+    const newQuantity = item.quantity + change;
+    if (newQuantity < 1) return;
+
+    // Calculate new SQM based on current ratio (SQM / Quantity)
+    // This assumes the ratio is constant (which it is for tiles)
+    const sqmPerTile = item.sqm / item.quantity;
+    const newSqm = Number((sqmPerTile * newQuantity).toFixed(2));
+
+    await updateItem(item.key, newQuantity, newSqm);
   };
 
-  const handleClearCart = () => {
-    dispatch(clearCart());
+  const handleClearCart = async () => {
+    await clearCart();
   };
 
   return (
@@ -44,7 +55,7 @@ export function Cart() {
 
       {/* Cart Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[450px] bg-background shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-[600px] bg-background shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -86,7 +97,7 @@ export function Cart() {
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {items.map((item) => (
                   <div
-                    key={item.id}
+                    key={item.key}
                     className="flex gap-4 border-b border-border pb-4 last:border-0"
                   >
                     {/* Product Image */}
@@ -104,88 +115,119 @@ export function Cart() {
                     </Link>
 
                     {/* Product Info */}
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        href={`/products/${item.slug}`}
-                        onClick={handleClose}
-                        className="font-medium text-sm hover:text-emperador transition-colors line-clamp-2 mb-1 block"
-                      >
-                        {item.name}
-                      </Link>
-
-                      {/* Price */}
-                      <div className="flex items-center gap-2 mb-3">
-                        {item.sale_price && item.regular_price && item.sale_price < item.regular_price ? (
-                          <>
-                            <span className="font-semibold text-sm">
-                              £{item.sale_price.toFixed(2)}
+                    <div className="flex-1 min-w-0 flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start gap-2">
+                            <Link
+                            href={`/products/${item.slug}`}
+                            onClick={handleClose}
+                            className="font-medium text-base hover:text-primary transition-colors line-clamp-2"
+                            >
+                            {item.name}
+                            </Link>
+                            {/* Line Total */}
+                            <span className="font-semibold whitespace-nowrap">
+                                {totals.currencySymbol}{parseFloat(item.lineTotal).toFixed(2)}
                             </span>
-                            <span className="text-xs text-muted-foreground line-through">
-                              £{item.regular_price.toFixed(2)}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="font-semibold text-sm">
-                            £{item.price.toFixed(2)}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Quantity Controls */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center border border-border rounded">
-                          <button
-                            onClick={() =>
-                              handleUpdateQuantity(item.id, item.quantity - 1)
-                            }
-                            className="p-0.5 hover:bg-muted transition-colors rounded-full"
-                            aria-label="Decrease quantity"
-                          >
-                            <Minus className="w-4 h-4" />
-                          </button>
-                          <span className="px-3 py-1 text-sm font-medium min-w-[40px] text-center">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() =>
-                              handleUpdateQuantity(item.id, item.quantity + 1)
-                            }
-                            className="p-0.5 hover:bg-muted transition-colors rounded-full"
-                            aria-label="Increase quantity"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
                         </div>
 
-                        {/* Remove Button */}
+                       
+                        {/* Variations / Attributes - FIXED SECTION */}
+                        {Array.isArray(item.variation) && item.variation.length > 0 && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {item.variation.map((v, i) => (
+                              <span key={i} className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                {v.attribute}: {v.value}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Unit Price (Per SQM) */}
+                        <div className="text-xs text-muted-foreground mt-1">
+                             {totals.currencySymbol}{item.price} / m²
+                        </div>
+                      </div>
+
+                      {/* Controls Footer */}
+                      <div className="flex items-end justify-between mt-3">
+                        <div className="flex flex-col gap-1">
+                             {/* Quantity Controls */}
+                            <div className="flex items-center border border-border rounded-md w-fit">
+                                <button
+                                    onClick={() => handleUpdateQuantity(item, -1)}
+                                    className="p-1 hover:bg-muted transition-colors disabled:opacity-50"
+                                    aria-label="Decrease quantity"
+                                >
+                                    <Minus className="w-3 h-3" />
+                                </button>
+                                <span className="w-8 text-center text-sm font-medium">
+                                    {item.quantity}
+                                </span>
+                                <button
+                                    onClick={() => handleUpdateQuantity(item, 1)}
+                                    className="p-1 hover:bg-muted transition-colors"
+                                    aria-label="Increase quantity"
+                                >
+                                    <Plus className="w-3 h-3" />
+                                </button>
+                            </div>
+                            <span className="text-xs text-muted-foreground ml-1">
+                                {item.sqm} m²
+                            </span>
+                        </div>
+
+                        {/* Remove */}
                         <button
-                          onClick={() => handleRemove(item.id)}
-                          className="p-2 text-destructive hover:bg-destructive/10 rounded transition-colors"
+                          onClick={() => handleRemove(item.key)}
+                          className="text-muted-foreground hover:text-destructive transition-colors p-1"
                           aria-label="Remove item"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
+                      
+                      {/* Stock Warning */}
+                      {item.stockQuantity !== null && item.quantity >= item.stockQuantity && (
+                          <div className="flex items-center gap-1 text-xs text-amber-600 mt-2">
+                              <AlertCircle className="w-3 h-3" />
+                              <span>Max stock reached</span>
+                          </div>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Footer */}
-              <div className="border-t border-border p-6 space-y-4">
-                {/* Subtotal */}
-                <div className="flex items-center justify-between text-lg">
-                  <span className="font-medium">Subtotal</span>
-                  <span className="font-semibold">£{total.toFixed(2)}</span>
+              <div className="border-t border-border p-6 bg-muted/10">
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center justify-between text-base">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-semibold">
+                      {totals.currencySymbol}{totals.subtotal}
+                    </span>
+                  </div>
+                  {/* Tax */}
+                  {parseFloat(totals.tax) > 0 && (
+                       <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Tax</span>
+                        <span>{totals.currencySymbol}{totals.tax}</span>
+                      </div>
+                  )}
+                  {/* Total */}
+                  <div className="flex items-center justify-between text-lg font-bold border-t border-border/50 pt-2">
+                    <span>Total</span>
+                    <span>{totals.currencySymbol}{totals.total}</span>
+                  </div>
                 </div>
 
-                <p className="text-xs text-muted-foreground text-center">
-                  Shipping and taxes calculated at checkout
+                <p className="text-xs text-muted-foreground text-center mb-4">
+                  Shipping calculated at checkout
                 </p>
 
-                {/* Action Buttons */}
-                <div className="space-y-2">
-                  <Button className="w-full uppercase tracking-wide" size="lg">
+                <div className="space-y-3">
+                  <Button className="w-full uppercase tracking-wide font-bold" size="lg">
                     Proceed to Checkout
                   </Button>
                   <Button
@@ -197,14 +239,15 @@ export function Cart() {
                   </Button>
                 </div>
 
-                {/* Clear Cart */}
                 {items.length > 0 && (
-                  <button
-                    onClick={handleClearCart}
-                    className="w-full text-sm text-muted-foreground hover:text-destructive transition-colors mt-4"
-                  >
-                    Clear Cart
-                  </button>
+                  <div className="mt-4 text-center">
+                    <button
+                      onClick={handleClearCart}
+                      className="text-xs text-muted-foreground hover:text-destructive transition-colors underline"
+                    >
+                      Clear All Items
+                    </button>
+                  </div>
                 )}
               </div>
             </>

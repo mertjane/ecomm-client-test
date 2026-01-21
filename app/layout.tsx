@@ -4,6 +4,7 @@ import { Lora } from 'next/font/google';
 import "./globals.css";
 import { Header } from "./components/layout/header/Header";
 import { Cart } from "./components/layout/cart/Cart";
+import { CartInitializer } from "./components/cart/CartInitializer";
 import { Search } from "./components/layout/search/Search";
 import { QuickViewSidebar } from "./components/layout/quick-view-sidebar";
 import { FilterSidebar } from "./components/layout/filterSidebar";
@@ -60,6 +61,7 @@ export default function RootLayout({
         className={`${sen.variable} ${lora.variable} min-h-screen antialiased`}>
 
         <Providers>
+          <CartInitializer />
           <Header />
           <Search />
           {children}

@@ -18,6 +18,23 @@ interface DealCardProps {
   index: number;
 }
 
+// Decode HTML entities like &amp; to &
+const decodeHtmlEntities = (text: string): string => {
+  const textarea = typeof document !== 'undefined' ? document.createElement('textarea') : null;
+  if (textarea) {
+    textarea.innerHTML = text;
+    return textarea.value;
+  }
+  // Fallback for SSR - handle common entities
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&apos;/g, "'");
+};
+
 export function DealCard({ deal, index }: DealCardProps) {
   const dispatch = useAppDispatch();
 
@@ -104,13 +121,13 @@ export function DealCard({ deal, index }: DealCardProps) {
         {deal.category && (
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
             <Tag className="w-3.5 h-3.5" />
-            <span className="uppercase tracking-widest">{deal.category}</span>
+            <span className="uppercase tracking-widest">{decodeHtmlEntities(deal.category)}</span>
           </div>
         )}
 
         {/* Title */}
         <h3 className="text-lg font-medium tracking-wide uppercase mb-3 text-card-foreground line-clamp-2 group-hover:text-emperador transition-colors duration-300">
-          {deal.title}
+          {decodeHtmlEntities(deal.title)}
         </h3>
 
         {/* Price Section */}
@@ -121,19 +138,19 @@ export function DealCard({ deal, index }: DealCardProps) {
           <span className="text-base text-muted-foreground line-through">
             £{deal.originalPrice.toFixed(2)}
           </span>
-          <div className="flex items-center gap-1 text-xs font-medium text-destructive ml-auto">
+          {/* <div className="flex items-center gap-1 text-xs font-medium text-destructive ml-auto">
             <TrendingDown className="w-3.5 h-3.5" />
             <span>{discountPercentage}%</span>
-          </div>
+          </div> */}
         </div>
 
         {/* Timer */}
-        {deal.expiresAt && (
+        {/* {deal.expiresAt && (
           <DealTimer expiresAt={deal.expiresAt} />
-        )}
+        )} */}
 
         {/* Stock Indicator */}
-        {deal.stock !== undefined && deal.stock < 20 && (
+       {/*  {deal.stock !== undefined && deal.stock < 20 && (
           <div className="mt-4 pt-4 border-t border-border">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground uppercase tracking-wider">
@@ -147,7 +164,7 @@ export function DealCard({ deal, index }: DealCardProps) {
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Decorative Border on Hover */}

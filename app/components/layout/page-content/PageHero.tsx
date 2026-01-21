@@ -9,22 +9,9 @@ interface PageHeroProps {
   className?: string;
 }
 
-export function PageHero({ title, image, className }: PageHeroProps) {
+export function PageHero({ title, className }: PageHeroProps) {
   return (
     <section className={cn('relative bg-emperador text-white', className)}>
-      {/* Background Image */}
-      {image && (
-        <div className="absolute inset-0 opacity-20">
-          <Image
-            src={image}
-            alt={title}
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
-      )}
-
       {/* Hero Content */}
       <div className="relative container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto text-center">

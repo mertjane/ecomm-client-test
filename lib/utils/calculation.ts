@@ -88,7 +88,7 @@ export function quantityToSqm(quantity: number, tileSize: string): number {
   if (!dimensions) return 0;
 
   const areaPerTile = calculateTileArea(dimensions);
-  return parseFloat((quantity * areaPerTile).toFixed(2));
+  return parseFloat((quantity * areaPerTile).toFixed(3));
 }
 
 /**

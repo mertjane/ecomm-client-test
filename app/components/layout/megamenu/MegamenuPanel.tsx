@@ -99,7 +99,7 @@ export function MegamenuPanel({ item, onClose }: MegamenuPanelProps) {
     return (
       <div className="w-full bg-background relative">
         <CloseButton onClick={onClose} />
-        <div className="mx-auto px-14 py-10">
+        <div className="mx-auto px-24 py-10">
           <div className="grid grid-cols-5 gap-x-12">
             {stoneCollectionColumns.map((column, colIndex) => {
               // Find matching items from API data by title
@@ -160,7 +160,7 @@ export function MegamenuPanel({ item, onClose }: MegamenuPanelProps) {
     return (
       <div className="w-full bg-background relative">
         <CloseButton onClick={onClose} />
-        <div className="mx-auto px-14 py-10">
+        <div className="mx-auto px-24 py-10">
           <div className="grid grid-cols-5 gap-x-12">
             {columns.map((columnItems, colIndex) => (
               <div key={colIndex} className="space-y-1">
@@ -181,7 +181,7 @@ export function MegamenuPanel({ item, onClose }: MegamenuPanelProps) {
     return (
       <div className="w-full bg-background relative">
         <CloseButton onClick={onClose} />
-        <div className="mx-auto px-14 py-10">
+        <div className="mx-auto px-24 py-10">
           <div className="grid grid-cols-[280px_1fr] gap-12">
             {/* Left: Menu Items */}
             <div className="space-y-1">

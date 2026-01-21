@@ -1,4 +1,4 @@
-'use client';
+/* 'use client';
 
 import { useAppDispatch } from '@/lib/redux/hooks';
 import { loadMockupData, clearCart } from '@/lib/redux/slices/cartSlice';
@@ -36,3 +36,4 @@ export function CartDevTools() {
     </div>
   );
 }
+ */

@@ -119,7 +119,7 @@ const TilingProducts = () => {
                                 style={{ width: `clamp(${CARD_WIDTH_MOBILE}px, 70vw, ${CARD_WIDTH_DESKTOP}px)` }}
                             >
                                 {/* Image - fixed height */}
-                                <div className="relative h-auto bg-gray-50 rounded-t-xl overflow-hidden">
+                                <div className="relative h-auto bg-white rounded-t-xl overflow-hidden">
                                     {product.images?.[0]?.src ? (
                                         <Image
                                             src={product.images[0].src}

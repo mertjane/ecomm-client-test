@@ -104,10 +104,15 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         {/* 1. DESKTOP HOVER OVERLAY (Hidden on Mobile)    */}
         {/* ============================================== */}
         {product.stock_status !== 'outofstock' && (
-          <div className="hidden md:flex absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-center justify-center gap-3 z-10">
-            
+          <>
+            {/* Background overlay - doesn't block clicks */}
+            <div className="hidden md:block absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
+
+            {/* Buttons container - centered, only buttons are clickable, hidden until hover */}
+            <div className="hidden md:flex absolute inset-0 items-center justify-center gap-3 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+
             {/* WRAPPER: Handles the "Slide Up" CSS animation separately */}
-            <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">
+            <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75 pointer-events-auto">
               <motion.button
                 layout
                 onClick={(e) => {
@@ -147,7 +152,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             </div>
 
            {/* --- ORDER SAMPLE BUTTON --- */}
-            <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-100">
+            <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-100 pointer-events-auto">
               <motion.button
                 layout
                 onClick={(e) => {
@@ -185,7 +190,8 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
               </motion.button>
             </div>
 
-          </div>
+            </div>
+          </>
         )}
 
         {/* ============================================== */}

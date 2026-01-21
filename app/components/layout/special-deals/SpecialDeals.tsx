@@ -27,7 +27,7 @@ export function SpecialDeals({
           <h2 className="text-foreground mb-4">
             {title}
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-transparent via-emperador to-transparent mx-auto" />
+          
         </div>
 
         {/* Deals Grid */}

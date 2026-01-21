@@ -1,158 +1,199 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { PLACEHOLDER_IMAGE } from '@/lib/constants/images';
-
-export interface CartItem {
-  id: number;
-  name: string;
-  slug: string; 
-  price: number;
-  regular_price?: number;
-  sale_price?: number;
-  quantity: number;
-  image: string;
-  stock_status: string;
-  price_html?: string;
-}
+import type { 
+  Cart, 
+  CartItem, 
+  CartTotals, 
+  CartCoupon, 
+  UpdateCartItemPayload 
+} from '@/types/cart';
 
 interface CartState {
   items: CartItem[];
+  coupons: CartCoupon[];
+  totals: CartTotals;
+  itemsCount: number;
   isOpen: boolean;
-  total: number;
-  itemCount: number;
+  isLoading: boolean;
+  error: string | null;
+  cartHash: string;
 }
+
+const initialTotals: CartTotals = {
+  subtotal: '0.00',
+  discount: '0.00',
+  shipping: '0.00',
+  tax: '0.00',
+  total: '0.00',
+  currency: 'GBP',
+  currencySymbol: '£',
+};
 
 const initialState: CartState = {
   items: [],
+  coupons: [],
+  totals: initialTotals,
+  itemsCount: 0,
   isOpen: false,
-  total: 0,
-  itemCount: 0,
+  isLoading: false,
+  error: null,
+  cartHash: '',
 };
 
-// Helper function to calculate totals
-const calculateTotals = (items: CartItem[]) => {
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  return { itemCount, total };
+const calculateLocalTotals = (items: CartItem[], currentTotals: CartTotals): CartTotals => {
+  const subtotal = items.reduce((acc, item) => {
+    // Safety check for parseFloat
+    const lineTotal = item.lineTotal ? parseFloat(item.lineTotal) : 0;
+    return acc + lineTotal;
+  }, 0);
+
+  return {
+    ...currentTotals,
+    subtotal: subtotal.toFixed(2),
+    total: subtotal.toFixed(2), 
+  };
 };
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    addToCart: (state, action: PayloadAction<CartItem>) => {
-      const existingItem = state.items.find((item) => item.id === action.payload.id);
+    addToCart: (state, action: PayloadAction<{ 
+      id: number; 
+      name: string; 
+      price: string; 
+      image: string; 
+      slug: string; 
+      quantity: number; 
+      sqm?: number; 
+      variation?: any;
+      variationId?: number;
+    }>) => {
+      const { id, name, price, image, slug, quantity, variation, sqm, variationId} = action.payload;
+      
+      const existingItem = state.items.find((i) => 
+        i.productId === id && i.variationId === variationId
+      );
+
+      // Ensure we have numbers for calculation
+      const priceVal = parseFloat(price);
+      const sqmVal = sqm || 0;
 
       if (existingItem) {
-        existingItem.quantity += action.payload.quantity;
+        existingItem.quantity += quantity;
+        if (sqm) existingItem.sqm += sqm;
+        
+        // Optimistic Line Total: (New SQM * Price) OR (New Qty * Price)
+        const multiplier = existingItem.sqm > 0 ? existingItem.sqm : existingItem.quantity;
+        existingItem.lineTotal = (priceVal * multiplier).toFixed(2);
       } else {
-        state.items.push(action.payload);
+        const newItem: CartItem = {
+          key: `${id}-${Date.now()}`, 
+          productId: id,
+          name: name,
+          slug: slug,
+          sku: 'local-sku',
+          quantity: quantity,
+          sqm: sqmVal,
+          price: price, 
+          // Optimistic Line Total
+          lineTotal: (priceVal * (sqmVal > 0 ? sqmVal : quantity)).toFixed(2),
+          image: image,
+          variation: variation || [],
+          variationId: variationId,
+          stockStatus: 'instock',
+          stockQuantity: null,
+          permalink: slug
+        };
+
+        state.items.push(newItem);
       }
 
-      const totals = calculateTotals(state.items);
-      state.itemCount = totals.itemCount;
-      state.total = totals.total;
+      state.itemsCount = state.items.reduce((acc, item) => acc + item.quantity, 0);
+      state.totals = calculateLocalTotals(state.items, state.totals);
+      state.isOpen = true; 
+    },
+    setCart: (state, action: PayloadAction<{ cart: Cart; cartHash: string }>) => {
+      // 1. Destructure payload
+      const { cart, cartHash } = action.payload;
+
+      // 2. Guard Clause: If cart is missing, do not proceed
+      if (!cart) {
+        return; 
+      }
+
+      // 3. Assign with fallbacks
+      state.items = cart.items || [];
+      state.coupons = cart.coupons || [];
+      state.totals = cart.totals || initialTotals;
+      state.itemsCount = cart.itemsCount || 0;
+      state.cartHash = cartHash || '';
+      state.error = null;
     },
 
-    removeFromCart: (state, action: PayloadAction<number>) => {
-      state.items = state.items.filter((item) => item.id !== action.payload);
-
-      const totals = calculateTotals(state.items);
-      state.itemCount = totals.itemCount;
-      state.total = totals.total;
+    removeFromCart: (state, action: PayloadAction<string>) => {
+      state.items = state.items.filter((item) => item.key !== action.payload);
+      state.itemsCount = state.items.reduce((acc, item) => acc + item.quantity, 0);
+      state.totals = calculateLocalTotals(state.items, state.totals);
     },
 
-    updateQuantity: (
-      state,
-      action: PayloadAction<{ id: number; quantity: number }>
-    ) => {
-      const item = state.items.find((item) => item.id === action.payload.id);
+    updateCartItem: (state, action: PayloadAction<UpdateCartItemPayload>) => {
+      const { key, quantity, sqm } = action.payload;
+      const item = state.items.find((i) => i.key === key);
 
       if (item) {
-        if (action.payload.quantity <= 0) {
-          state.items = state.items.filter((item) => item.id !== action.payload.id);
+        if (quantity <= 0) {
+          state.items = state.items.filter((i) => i.key !== key);
         } else {
-          item.quantity = action.payload.quantity;
+          item.quantity = quantity;
+          item.sqm = sqm;
+          
+          const pricePerSqm = parseFloat(item.price || '0');
+          const newLineTotal = pricePerSqm * sqm;
+          item.lineTotal = newLineTotal.toFixed(2);
         }
+        
+        state.itemsCount = state.items.reduce((acc, item) => acc + item.quantity, 0);
+        state.totals = calculateLocalTotals(state.items, state.totals);
       }
-
-      const totals = calculateTotals(state.items);
-      state.itemCount = totals.itemCount;
-      state.total = totals.total;
     },
 
     clearCart: (state) => {
       state.items = [];
-      state.itemCount = 0;
-      state.total = 0;
+      state.coupons = [];
+      state.totals = initialTotals;
+      state.itemsCount = 0;
+      state.cartHash = '';
     },
 
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
+    setError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
+    },
     toggleCart: (state) => {
       state.isOpen = !state.isOpen;
     },
-
     openCart: (state) => {
       state.isOpen = true;
     },
-
     closeCart: (state) => {
       state.isOpen = false;
-    },
-
-    // For testing/demo: load mockup data
-    loadMockupData: (state) => {
-      state.items = [
-        {
-          id: 1,
-          name: 'Premium Marble Tile',
-          slug: 'premium-marble-tile',
-          price: 45.99,
-          regular_price: 59.99,
-          sale_price: 45.99,
-          quantity: 2,
-          image: PLACEHOLDER_IMAGE,
-          stock_status: 'instock',
-          price_html: '<span class="price">£45.99</span> / m²',
-        },
-        {
-          id: 2,
-          name: 'Oak Wood Flooring',
-          slug: 'oak-wood-flooring',
-          price: 89.99,
-          quantity: 1,
-          image: PLACEHOLDER_IMAGE,
-          stock_status: 'instock',
-          price_html: '<span class="price">£89.99</span> / m²',
-        },
-        {
-          id: 3,
-          name: 'Ceramic Wall Tiles',
-          slug: 'ceramic-wall-tiles',
-          price: 25.50,
-          regular_price: 35.00,
-          sale_price: 25.50,
-          quantity: 3,
-          image: PLACEHOLDER_IMAGE,
-          stock_status: 'instock',
-          price_html: '<span class="price">£25.50</span> / m²',
-        },
-      ];
-
-      const totals = calculateTotals(state.items);
-      state.itemCount = totals.itemCount;
-      state.total = totals.total;
     },
   },
 });
 
 export const {
   addToCart,
+  setCart,
   removeFromCart,
-  updateQuantity,
+  updateCartItem,
   clearCart,
+  setLoading,
+  setError,
   toggleCart,
   openCart,
   closeCart,
-  loadMockupData,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

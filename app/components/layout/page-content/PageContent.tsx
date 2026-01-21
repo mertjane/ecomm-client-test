@@ -21,7 +21,7 @@ export function PageContent({ title, content, className }: PageContentProps) {
             prose-h2:text-foreground prose-h2:border-b prose-h2:border-border prose-h2:pb-4 prose-h2:mb-6
             prose-h3:text-foreground prose-h3:mt-8 prose-h3:mb-4
             prose-h4:text-foreground prose-h4:mt-6 prose-h4:mb-3
-            prose-p:text-foreground prose-p:leading-relaxed prose-p:mb-4
+            prose-p:text-foreground prose-p:leading-relaxed prose-p:mb-4 prose-p:mt-4
             prose-a:text-emperador prose-a:underline-offset-4 hover:prose-a:text-emperador/80
             prose-strong:text-foreground prose-strong:font-semibold
             prose-ul:list-disc prose-ul:ml-6 prose-ul:mb-4

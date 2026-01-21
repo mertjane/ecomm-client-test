@@ -8,9 +8,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/lib/redux/hooks';
 import { setSelectedProduct } from '@/lib/redux/slices/selectedProductSlice';
+import { addToCart, setCart } from '@/lib/redux/slices/cartSlice';
+import { addToCart as apiAddToCart } from '@/lib/api/cart';
 import { getProductBySlug } from '@/lib/api/products';
 import { fetchProductVariations, ProductVariation } from '@/lib/api/variations';
-import { quantityToSqm, sqmToQuantity, getMinSqmIncrement, isMosaicVariation, extractMosaicDimensions } from '@/lib/utils/calculation';
+import { sqmToQuantity, isMosaicVariation, extractMosaicDimensions } from '@/lib/utils/calculation';
 import SpPhotoSection from '@/app/components/layout/sp-photo-section/SpPhotoSection';
 import SpVariations from '@/app/components/layout/sp-variations/SpVariations';
 import SpProductDetails from '@/app/components/layout/sp-product-details/SpProductDetails';
@@ -52,6 +54,7 @@ const SingleProductPage = () => {
     const [showQuantityWarning, setShowQuantityWarning] = useState<boolean>(false);
     const [showTileCalcWarning, setShowTileCalcWarning] = useState<boolean>(false);
     const [hasChangedQuantity, setHasChangedQuantity] = useState<boolean>(false);
+    const [isAdding, setIsAdding] = useState<boolean>(false);
 
 
     // Fetch product by slug if not in Redux (handles hard reload)
@@ -429,7 +432,6 @@ const SingleProductPage = () => {
     };
 
 
-
     // Handle wastage toggle - updates Quantity (add 10%), then recalculates SQM
     const handleWastageToggle = (checked: boolean) => {
         setAddWastage(checked);
@@ -462,9 +464,11 @@ const SingleProductPage = () => {
     };
 
 
-
     // Handle add to cart click
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
+        // Check if product exists
+        if (!product) return;
+
         // Check if variation is selected
         if (!selectedVariation) {
             triggerSizeWarning();
@@ -477,7 +481,57 @@ const SingleProductPage = () => {
             return;
         }
 
-        // TODO: Add to cart implementation
+        if (isAdding) return; // Prevent double-clicks
+
+        setIsAdding(true);
+
+        try {
+            // 1. Prepare the payload
+            const payloadSqm = isSampleVariation ? 0 : Number(sqm);
+            const priceString = selectedVariation.price;
+            const productImage = product.images?.[0]?.src || '';
+            const variationId = selectedVariation.id;
+
+            const variationData = [{ attribute: "Size", value: selectedVariation.name }];
+
+            // 2. Optimistic Update: Update Redux immediately for UI speed
+            dispatch(
+                addToCart({
+                    id: product.id,
+                    name: product.name,
+                    price: priceString,
+                    quantity: quantity,
+                    sqm: payloadSqm,
+                    image: productImage,
+                    slug: product.slug,
+                    variation: variationData,
+                    variationId: variationId,
+                }),
+            );
+
+            // 3. Server Sync: Call the backend
+            const response = await apiAddToCart({
+                productId: product.id,
+                quantity: quantity,
+                sqm: payloadSqm,
+                variation: variationData,
+                variationId: variationId,
+            });
+
+            // 4. Update Redux with the "True" cart from server
+            if (response && response.data) {
+                dispatch(
+                    setCart({
+                        cart: response.data.cart,
+                        cartHash: response.data.cartHash,
+                    }),
+                );
+            }
+        } catch (error) {
+            console.error("Failed to add to cart", error);
+        } finally {
+            setIsAdding(false);
+        }
     };
 
     // Show tile calculator warning

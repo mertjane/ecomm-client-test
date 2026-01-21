@@ -14,7 +14,7 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
   return (
-    <nav aria-label="Breadcrumb" className="w-full bg-background border-b border-border relative z-45">
+    <nav aria-label="Breadcrumb" className="w-full bg-background border-b border-border relative z-40">
       <div className="container mx-auto px-4 py-3">
         {/* Relative wrapper for the fade positioning */}
         <div className="relative">

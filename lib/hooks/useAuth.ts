@@ -110,6 +110,20 @@ export function useAuth() {
   }, []);
 
   /**
+   * Refresh user data from server
+   */
+  const refreshUser = useCallback(async () => {
+    try {
+      const user = await authApi.getCurrentUser();
+      if (user) {
+        dispatch(loginSuccess({ user, rememberMe: !!localStorage.getItem('auth_token') }));
+      }
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
+  }, [dispatch]);
+
+  /**
    * Clear error message
    */
   const clearAuthError = useCallback(() => {
@@ -122,6 +136,7 @@ export function useAuth() {
     signup,
     logout,
     requestPasswordReset,
+    refreshUser,
     clearError: clearAuthError,
   };
 }

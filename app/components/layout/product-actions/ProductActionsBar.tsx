@@ -136,7 +136,7 @@ const ProductActionsBar = ({ totalProducts = 0, sortBy, onSortChange, lockedMate
 
   return (
     <>
-      <div className="w-full bg-background border-b border-border sticky top-[var(--header-height)] z-40">
+      <div className="w-full bg-background border-b border-border z-40">
         <div className="container mx-auto px-4 py-3 sm:py-4">
         <div className="flex flex-row sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           {/* Left Side: Filters */}

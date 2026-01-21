@@ -81,6 +81,10 @@ export const authApi = {
    */
   getCurrentUser: async (): Promise<User | null> => {
     try {
+      if (typeof window === 'undefined') {
+        return null;
+      }
+
       const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
 
       if (!token) {
@@ -91,8 +95,10 @@ export const authApi = {
       return data.data.customer;
     } catch (error) {
       // Clear invalid tokens
-      localStorage.removeItem('auth_token');
-      sessionStorage.removeItem('auth_token');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+        sessionStorage.removeItem('auth_token');
+      }
       return null;
     }
   },

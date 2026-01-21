@@ -11,11 +11,13 @@ export const apiClient = axios.create({
 // Request interceptor to add auth token to headers
 apiClient.interceptors.request.use(
   (config) => {
-    // Get token from localStorage or sessionStorage
-    const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+    // Only access storage on client side
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
 
     return config;

@@ -61,10 +61,10 @@ export const MediaAndSponsors: React.FC = () => {
         {/* Media Section */}
         <div className="mb-20 md:mb-28">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-emperador/10 mb-3">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3">
               As Seen on TV
             </h2>
-            <div className="w-20 h-0.5 bg-primary mx-auto"></div>
+           
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 max-w-4xl mx-auto items-center">
@@ -108,10 +108,10 @@ export const MediaAndSponsors: React.FC = () => {
         {/* Sponsors Section */}
         <div>
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-emperador/10 mb-3">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3">
               Sponsorships & Charities
             </h2>
-            <div className="w-20 h-0.5 bg-primary mx-auto mb-4"></div>
+            
             <p className="text-neutral-600 max-w-2xl mx-auto text-sm md:text-base">
               Supporting communities and causes we believe in
             </p>

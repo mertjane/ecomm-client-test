@@ -25,7 +25,7 @@ export function SpecialDealsSection({
               </p>
             )}
             <h2 className="text-foreground mb-4">{title}</h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-transparent via-emperador to-transparent mx-auto" />
+            
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
             {[...Array(8)].map((_, i) => (
