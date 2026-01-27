@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle, Package, ArrowRight, Home } from 'lucide-react';
+import { CheckCircle, Package, Home, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export default function OrderConfirmationPage() {
+function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const orderId = searchParams.get('order');
@@ -126,5 +126,21 @@ export default function OrderConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Loader2 className="w-8 h-8 animate-spin text-emperador" />
+    </div>
+  );
+}
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <OrderConfirmationContent />
+    </Suspense>
   );
 }
