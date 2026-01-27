@@ -21,6 +21,8 @@ export interface CartItem {
   image: string;
   variation: CartVariation[];
   variationId?: number;
+  variationName?: string; // e.g., "Free Sample (100x100)" or "Full Size Sample"
+  isSample?: boolean; // true for sample variations (price per piece, not per m²)
   tileSize?: string; // e.g., "300x300x16" for calculation
   stockStatus: string;
   stockQuantity: number | null;

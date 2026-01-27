@@ -21,9 +21,17 @@ export function useAuth() {
    */
   useEffect(() => {
     const initAuth = async () => {
-      const user = await authApi.getCurrentUser();
-      if (user) {
-        dispatch(loginSuccess({ user, rememberMe: !!localStorage.getItem('auth_token') }));
+      dispatch(setLoading(true));
+      try {
+        const user = await authApi.getCurrentUser();
+        if (user) {
+          dispatch(loginSuccess({ user, rememberMe: !!localStorage.getItem('auth_token') }));
+        } else {
+          dispatch(setLoading(false));
+        }
+      } catch (error) {
+        console.error('Auth init error:', error);
+        dispatch(setLoading(false));
       }
     };
 

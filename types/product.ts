@@ -37,6 +37,12 @@ export interface ProductAttribute {
   options: string[];
 }
 
+export interface ProductDimensions {
+  length: string;
+  width: string;
+  height: string;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -55,6 +61,13 @@ export interface Product {
   images: ProductImage[];
   attributes: ProductAttribute[];
   variations?: number[];
+  // Product descriptions
+  description?: string;
+  short_description?: string;
+  // Product specifications
+  weight?: string;
+  dimensions?: ProductDimensions;
+  sku?: string;
   yoast_head_json: {
     og_image: {
       url: string;

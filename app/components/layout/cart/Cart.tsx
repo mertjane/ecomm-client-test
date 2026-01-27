@@ -1,6 +1,7 @@
 'use client';
 
 import { useCart } from '@/lib/hooks/useCart';
+import { useCheckout } from '@/lib/hooks/useCheckout';
 import { X, Plus, Minus, ShoppingBag, Trash2, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -17,6 +18,7 @@ export function Cart() {
     updateItem,
     clearCart
   } = useCart();
+  const { goToCheckout } = useCheckout();
 
   const handleClose = () => {
     closeCart();
@@ -131,9 +133,17 @@ export function Cart() {
                             </span>
                         </div>
 
-                       
+                        {/* Variation Name (e.g., "Free Sample (100x100)") */}
+                        {item.variationName && (
+                          <div className="mt-1">
+                            <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                              {item.variationName}
+                            </span>
+                          </div>
+                        )}
+
                         {/* Variations / Attributes - FIXED SECTION */}
-                        {Array.isArray(item.variation) && item.variation.length > 0 && (
+                        {!item.variationName && Array.isArray(item.variation) && item.variation.length > 0 && (
                           <div className="mt-1 flex flex-wrap gap-1">
                             {item.variation.map((v, i) => (
                               <span key={i} className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
@@ -142,10 +152,10 @@ export function Cart() {
                             ))}
                           </div>
                         )}
-                        
-                        {/* Unit Price (Per SQM) */}
+
+                        {/* Unit Price - Per piece for samples, Per SQM for tiles */}
                         <div className="text-xs text-muted-foreground mt-1">
-                             {totals.currencySymbol}{item.price} / m²
+                             {totals.currencySymbol}{item.price} {item.isSample ? 'per piece' : '/ m²'}
                         </div>
                       </div>
 
@@ -172,9 +182,12 @@ export function Cart() {
                                     <Plus className="w-3 h-3" />
                                 </button>
                             </div>
-                            <span className="text-xs text-muted-foreground ml-1">
-                                {item.sqm} m²
-                            </span>
+                            {/* Only show SQM for non-sample items */}
+                            {!item.isSample && item.sqm > 0 && (
+                              <span className="text-xs text-muted-foreground ml-1">
+                                  {item.sqm} m²
+                              </span>
+                            )}
                         </div>
 
                         {/* Remove */}
@@ -227,7 +240,14 @@ export function Cart() {
                 </p>
 
                 <div className="space-y-3">
-                  <Button className="w-full uppercase tracking-wide font-bold" size="lg">
+                  <Button
+                    className="w-full uppercase tracking-wide font-bold"
+                    size="lg"
+                    onClick={() => {
+                      closeCart();
+                      goToCheckout();
+                    }}
+                  >
                     Proceed to Checkout
                   </Button>
                   <Button

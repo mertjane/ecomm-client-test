@@ -92,6 +92,52 @@ export function useCart() {
   );
 
   /**
+   * Add sample to cart (quantity = 1, no sqm calculation)
+   * Used for "Order Sample" functionality
+   */
+  const addSampleToCart = useCallback(
+    async (productId: number, variationId?: number) => {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+
+      try {
+        const payload: AddToCartPayload = {
+          productId,
+          quantity: 1,
+          sqm: 0, // No sqm for samples
+          variation: [],
+          variationId,
+          tileSize: '',
+        };
+
+        const response = await cartApi.addToCart(payload);
+
+        if (response.success) {
+          dispatch(
+            setCart({
+              cart: response.data.cart,
+              cartHash: response.data.cartHash,
+            })
+          );
+          dispatch(openCart()); // Open cart drawer on add
+          return { success: true, message: 'Sample added to cart' };
+        } else {
+          const errorMsg = response.message || 'Failed to add sample';
+          dispatch(setError(errorMsg));
+          return { success: false, message: errorMsg };
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to add sample to cart';
+        dispatch(setError(message));
+        return { success: false, message };
+      } finally {
+        dispatch(setLoading(false));
+      }
+    },
+    [dispatch]
+  );
+
+  /**
    * Update cart item quantity and sqm
    */
   const updateItem = useCallback(
@@ -289,6 +335,7 @@ export function useCart() {
     // Actions
     syncCart,
     addToCart,
+    addSampleToCart,
     updateItem,
     updateItemBySqm,
     removeItem,

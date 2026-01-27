@@ -8,6 +8,7 @@ import quickViewReducer from './slices/quickViewSlice';
 import filterSidebarReducer from './slices/filterSidebarSlice';
 import productFilterReducer from './slices/productFilterSlice';
 import selectedProductReducer from './slices/selectedProductSlice';
+import checkoutReducer from './slices/checkoutSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -21,6 +22,7 @@ export const makeStore = () => {
       filterSidebar: filterSidebarReducer,
       productFilter: productFilterReducer,
       selectedProduct: selectedProductReducer,
+      checkout: checkoutReducer,
     },
   });
 };

@@ -2,11 +2,13 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence } from "motion/react"; 
-import { Eye, Package } from 'lucide-react';
+import { motion, AnimatePresence } from "motion/react";
+import { Eye, Package, Loader2 } from 'lucide-react';
 import { useAppDispatch } from '@/lib/redux/hooks';
 import { openQuickView } from '@/lib/redux/slices/quickViewSlice';
 import { setSelectedProduct } from '@/lib/redux/slices/selectedProductSlice';
+import { useCart } from '@/lib/hooks/useCart';
+import { fetchProductVariations } from '@/lib/api/variations';
 import { PLACEHOLDER_IMAGE } from '@/lib/constants/images';
 import type { Product } from '@/types/product';
 import { useState } from 'react';
@@ -18,9 +20,11 @@ interface ProductCardProps {
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const dispatch = useAppDispatch();
+  const { addSampleToCart } = useCart();
 
   const [isHovered, setIsHovered] = useState(false);
   const [isOrderHovered, setIsOrderHovered] = useState(false);
+  const [isAddingSample, setIsAddingSample] = useState(false);
 
   const imageSrc =
     product.images?.[0]?.src ||
@@ -44,11 +48,55 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     dispatch(openQuickView(product));
   };
 
-  const handleOrderSample = (e: React.MouseEvent) => {
+  const handleOrderSample = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // TODO: Open order sample modal/form
-    console.log('Order sample:', product.slug);
+
+    // Check stock status
+    if (product.stock_status !== 'instock') {
+      alert('Sorry, this product is currently out of stock.');
+      return;
+    }
+
+    // Prevent double-clicks
+    if (isAddingSample) return;
+
+    setIsAddingSample(true);
+
+    try {
+      // Fetch all variations for this product
+      const variations = await fetchProductVariations(product.id);
+
+      // Find the FREE sample variation by SKU containing "free-sample"
+      // This distinguishes from "Full Size Sample" which is paid
+      const freeSampleVariation = variations.find((variation) =>
+        variation.sku?.toLowerCase().includes('free-sample') ||
+        variation.name?.toLowerCase().includes('free sample')
+      );
+
+      if (!freeSampleVariation) {
+        alert('No free sample available for this product.');
+        return;
+      }
+
+      // Check if free sample variation is in stock
+      if (freeSampleVariation.stock_status === 'outofstock') {
+        alert('Sorry, the free sample is currently out of stock.');
+        return;
+      }
+
+      // Add the free sample variation to cart
+      const result = await addSampleToCart(product.id, freeSampleVariation.id);
+
+      if (!result.success) {
+        alert(result.message || 'Failed to add sample to cart');
+      }
+      // Cart drawer opens automatically on success
+    } catch (error) {
+      alert('Failed to add sample to cart. Please try again.');
+    } finally {
+      setIsAddingSample(false);
+    }
   };
 
   const handleProductClick = () => {
@@ -65,11 +113,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       )
     )
     : false;
-
-  console.log('Is this a tile?', isTile);
-
-
-
 
   return (
     <div className="group bg-card border border-border hover:shadow-lg transition-all duration-300">
@@ -162,11 +205,21 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                 }}
                 onHoverStart={() => setIsOrderHovered(true)}
                 onHoverEnd={() => setIsOrderHovered(false)}
-                className="bg-white text-foreground h-10 px-3 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-emperador hover:text-white overflow-hidden"
+                disabled={isAddingSample}
+                className="bg-white text-foreground h-10 px-3 rounded-full shadow-lg flex items-center justify-center gap-2 hover:bg-emperador hover:text-white overflow-hidden disabled:opacity-70"
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
                 <AnimatePresence mode="popLayout" initial={false}>
-                  {isOrderHovered ? (
+                  {isAddingSample ? (
+                    <motion.span
+                      key="os-loading"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                    >
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    </motion.span>
+                  ) : isOrderHovered ? (
                     <motion.span
                       key="os-text"
                       initial={{ opacity: 0, x: -10 }}
@@ -217,10 +270,17 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                   e.stopPropagation();
                   handleOrderSample(e);
                 }}
-                className="flex-1 bg-white/50 backdrop-blur-sm text-emperador py-2.5 flex items-center justify-center gap-2 border-t border-border active:bg-muted transition-colors"
+                disabled={isAddingSample}
+                className="flex-1 bg-white/50 backdrop-blur-sm text-emperador py-2.5 flex items-center justify-center gap-2 border-t border-border active:bg-muted transition-colors disabled:opacity-70"
               >
-                <Package className="w-4 h-4" />
-                <span className="text-xs font-medium uppercase tracking-wide">Order Sample</span>
+                {isAddingSample ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Package className="w-4 h-4" />
+                )}
+                <span className="text-xs font-medium uppercase tracking-wide">
+                  {isAddingSample ? 'Adding...' : 'Order Sample'}
+                </span>
               </button>
             </div>
           </div>
