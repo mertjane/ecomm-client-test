@@ -10,7 +10,7 @@ interface CheckoutLayoutProps {
 }
 
 export function CheckoutLayout({ children }: CheckoutLayoutProps) {
-  const { currentStep, isAuthenticated } = useCheckout();
+  const { currentStep, isAuthenticated, isGuestCheckout } = useCheckout();
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -24,6 +24,7 @@ export function CheckoutLayout({ children }: CheckoutLayoutProps) {
             <CheckoutStepIndicator
               currentStep={currentStep}
               isAuthenticated={isAuthenticated}
+              isGuestCheckout={isGuestCheckout}
             />
           </div>
 

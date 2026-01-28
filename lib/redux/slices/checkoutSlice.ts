@@ -43,6 +43,9 @@ interface CheckoutState {
   billingAddress: Address | null;
   shippingAddress: Address | null;
   sameAsShipping: boolean;
+  // Guest checkout
+  isGuestCheckout: boolean;
+  guestEmail: string | null;
   // Shipping
   shippingZone: ShippingZone | null;
   shippingMethods: ShippingMethod[];
@@ -64,6 +67,9 @@ const initialState: CheckoutState = {
   billingAddress: null,
   shippingAddress: null,
   sameAsShipping: true,
+  // Guest checkout
+  isGuestCheckout: false,
+  guestEmail: null,
   // Shipping
   shippingZone: null,
   shippingMethods: [],
@@ -86,6 +92,14 @@ const checkoutSlice = createSlice({
   reducers: {
     setCanAccess: (state, action: PayloadAction<boolean>) => {
       state.canAccess = action.payload;
+    },
+
+    setGuestCheckout: (state, action: PayloadAction<boolean>) => {
+      state.isGuestCheckout = action.payload;
+    },
+
+    setGuestEmail: (state, action: PayloadAction<string | null>) => {
+      state.guestEmail = action.payload;
     },
 
     setCurrentStep: (state, action: PayloadAction<CheckoutStep>) => {
@@ -219,6 +233,8 @@ const checkoutSlice = createSlice({
 
 export const {
   setCanAccess,
+  setGuestCheckout,
+  setGuestEmail,
   setCurrentStep,
   setBillingAddress,
   setShippingAddress,

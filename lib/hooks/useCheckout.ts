@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import {
   setCanAccess,
+  setGuestCheckout,
+  setGuestEmail,
   setCurrentStep,
   setBillingAddress,
   setShippingAddress,
@@ -108,6 +110,14 @@ export function useCheckout() {
   }, [dispatch]);
 
   /**
+   * Continue checkout as guest (without account)
+   */
+  const continueAsGuest = useCallback(() => {
+    dispatch(setGuestCheckout(true));
+    dispatch(completeStep('login'));
+  }, [dispatch]);
+
+  /**
    * Update billing address
    */
   const updateBillingAddress = useCallback(
@@ -141,10 +151,16 @@ export function useCheckout() {
    * Complete addresses step
    */
   const completeAddresses = useCallback(() => {
-    const { billingAddress, shippingAddress, sameAsShipping } = checkoutState;
+    const { billingAddress, shippingAddress, sameAsShipping, isGuestCheckout } = checkoutState;
 
     if (!billingAddress?.address_1) {
       dispatch(setError('Please enter a billing address'));
+      return false;
+    }
+
+    // Require email for guest checkout
+    if (isGuestCheckout && !billingAddress?.email) {
+      dispatch(setError('Please enter an email address for order confirmation'));
       return false;
     }
 
@@ -153,9 +169,14 @@ export function useCheckout() {
       return false;
     }
 
+    // Store guest email for order processing
+    if (isGuestCheckout && billingAddress?.email) {
+      dispatch(setGuestEmail(billingAddress.email));
+    }
+
     dispatch(completeStep('addresses'));
     return true;
-  }, [dispatch, checkoutState.billingAddress, checkoutState.shippingAddress, checkoutState.sameAsShipping]);
+  }, [dispatch, checkoutState.billingAddress, checkoutState.shippingAddress, checkoutState.sameAsShipping, checkoutState.isGuestCheckout]);
 
   /**
    * Fetch shipping rates for current address
@@ -456,6 +477,7 @@ export function useCheckout() {
 
     // Step: Login
     onLoginSuccess,
+    continueAsGuest,
 
     // Step: Addresses
     updateBillingAddress,

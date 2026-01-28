@@ -21,25 +21,28 @@ const steps: Step[] = [
 interface CheckoutStepIndicatorProps {
   currentStep: CheckoutStep;
   isAuthenticated: boolean;
+  isGuestCheckout?: boolean;
 }
 
 export function CheckoutStepIndicator({
   currentStep,
   isAuthenticated,
+  isGuestCheckout = false,
 }: CheckoutStepIndicatorProps) {
   const stepOrder: CheckoutStep[] = ['login', 'addresses', 'shipping', 'payment', 'review'];
   const currentIndex = stepOrder.indexOf(currentStep);
 
-  // Filter out login step if authenticated
-  const visibleSteps = isAuthenticated
+  // Filter out login step if authenticated or guest checkout
+  const skipLoginStep = isAuthenticated || isGuestCheckout;
+  const visibleSteps = skipLoginStep
     ? steps.filter((s) => s.id !== 'login')
     : steps;
 
   const getStepStatus = (stepId: CheckoutStep) => {
     const stepIndex = stepOrder.indexOf(stepId);
 
-    // Skip login if authenticated
-    if (isAuthenticated && stepId === 'login') {
+    // Skip login if authenticated or guest checkout
+    if (skipLoginStep && stepId === 'login') {
       return 'completed';
     }
 
@@ -108,7 +111,7 @@ export function CheckoutStepIndicator({
       <div className="sm:hidden">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium uppercase tracking-wide">
-            Step {currentIndex + (isAuthenticated ? 0 : 1)} of {visibleSteps.length}
+            Step {currentIndex + (skipLoginStep ? 0 : 1)} of {visibleSteps.length}
           </span>
           <span className="text-sm text-muted-foreground">
             {steps.find((s) => s.id === currentStep)?.label}

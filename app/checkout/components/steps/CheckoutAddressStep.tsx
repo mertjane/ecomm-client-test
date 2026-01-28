@@ -17,6 +17,7 @@ export function CheckoutAddressStep() {
     sameAsShipping,
     user,
     error,
+    isGuestCheckout,
     updateBillingAddress,
     updateShippingAddress,
     toggleSameAsShipping,
@@ -122,6 +123,7 @@ export function CheckoutAddressStep() {
                   ? () => setEditingBilling(false)
                   : undefined
               }
+              requireEmail={isGuestCheckout}
             />
           ) : billingAddress?.address_1 ? (
             <AddressDisplay address={billingAddress} />
@@ -276,9 +278,10 @@ interface AddressFormProps {
   type: 'billing' | 'shipping';
   onSave: (address: Address) => void;
   onCancel?: () => void;
+  requireEmail?: boolean;
 }
 
-function AddressForm({ address, type, onSave, onCancel }: AddressFormProps) {
+function AddressForm({ address, type, onSave, onCancel, requireEmail = false }: AddressFormProps) {
   const [formData, setFormData] = useState<Address>({
     first_name: address?.first_name || '',
     last_name: address?.last_name || '',
@@ -406,22 +409,31 @@ function AddressForm({ address, type, onSave, onCancel }: AddressFormProps) {
       {type === 'billing' && (
         <>
           <div className="space-y-2">
+            <Label htmlFor={`${type}_email`}>
+              Email {requireEmail ? '*' : ''}
+            </Label>
+            <Input
+              id={`${type}_email`}
+              name="email"
+              type="email"
+              value={formData.email || ''}
+              onChange={handleChange}
+              required={requireEmail}
+              placeholder={requireEmail ? 'Required for order confirmation' : ''}
+            />
+            {requireEmail && (
+              <p className="text-xs text-muted-foreground">
+                We'll send your order confirmation and updates to this email.
+              </p>
+            )}
+          </div>
+          <div className="space-y-2">
             <Label htmlFor={`${type}_phone`}>Phone</Label>
             <Input
               id={`${type}_phone`}
               name="phone"
               type="tel"
               value={formData.phone || ''}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor={`${type}_email`}>Email</Label>
-            <Input
-              id={`${type}_email`}
-              name="email"
-              type="email"
-              value={formData.email || ''}
               onChange={handleChange}
             />
           </div>
