@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Truck, Package, ChevronLeft, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCheckout } from '@/lib/hooks/useCheckout';
@@ -28,12 +28,13 @@ export function CheckoutShippingStep() {
   // Get the effective shipping address
   const effectiveAddress = sameAsShipping ? billingAddress : shippingAddress;
   const hasFetchedRef = useRef(false);
+  const [hasInitialLoad, setHasInitialLoad] = useState(shippingMethods.length > 0);
 
   // Fetch shipping rates on mount if not already loaded
   useEffect(() => {
     if (shippingMethods.length === 0 && !isLoadingShipping && effectiveAddress?.country && !hasFetchedRef.current) {
       hasFetchedRef.current = true;
-      fetchShippingRates();
+      fetchShippingRates().finally(() => setHasInitialLoad(true));
     }
   }, [shippingMethods.length, isLoadingShipping, effectiveAddress?.country, fetchShippingRates]);
 
@@ -86,7 +87,7 @@ export function CheckoutShippingStep() {
       )}
 
       {/* Loading State */}
-      {isLoadingShipping && (
+      {(isLoadingShipping || (!hasInitialLoad && shippingMethods.length === 0)) && (
         <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-lg">
           <Loader2 className="w-8 h-8 animate-spin text-emperador mb-4" />
           <p className="text-muted-foreground">
@@ -167,7 +168,7 @@ export function CheckoutShippingStep() {
       )}
 
       {/* No Methods Available */}
-      {!isLoadingShipping && shippingMethods.length === 0 && !error && (
+      {hasInitialLoad && !isLoadingShipping && shippingMethods.length === 0 && !error && (
         <div className="text-center py-12 border border-dashed border-border rounded-lg">
           <Truck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground mb-4">
