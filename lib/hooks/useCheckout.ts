@@ -155,7 +155,7 @@ export function useCheckout() {
 
     dispatch(completeStep('addresses'));
     return true;
-  }, [dispatch, checkoutState]);
+  }, [dispatch, checkoutState.billingAddress, checkoutState.shippingAddress, checkoutState.sameAsShipping]);
 
   /**
    * Fetch shipping rates for current address
@@ -285,7 +285,7 @@ export function useCheckout() {
 
     dispatch(completeStep('shipping'));
     return true;
-  }, [dispatch, checkoutState]);
+  }, [dispatch, checkoutState.selectedShippingMethod]);
 
   /**
    * Select payment method
@@ -327,7 +327,7 @@ export function useCheckout() {
 
     dispatch(completeStep('payment'));
     return true;
-  }, [dispatch, checkoutState]);
+  }, [dispatch, checkoutState.paymentMethod, checkoutState.cardDetails]);
 
   /**
    * Accept terms and conditions
@@ -381,7 +381,7 @@ export function useCheckout() {
       dispatch(setError(message));
       return false;
     }
-  }, [dispatch, checkoutState]);
+  }, [dispatch, checkoutState.agreedToTerms, checkoutState.selectedShippingMethod]);
 
   /**
    * Go back to previous step
@@ -432,7 +432,7 @@ export function useCheckout() {
       currency: totals.currency || 'GBP',
       currencySymbol: totals.currencySymbol || '£',
     };
-  }, [checkoutState, totals]);
+  }, [checkoutState.selectedShippingMethod, totals]);
 
   return {
     // State
