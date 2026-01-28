@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Truck, Package, ChevronLeft, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCheckout } from '@/lib/hooks/useCheckout';
@@ -27,10 +27,12 @@ export function CheckoutShippingStep() {
 
   // Get the effective shipping address
   const effectiveAddress = sameAsShipping ? billingAddress : shippingAddress;
+  const hasFetchedRef = useRef(false);
 
   // Fetch shipping rates on mount if not already loaded
   useEffect(() => {
-    if (shippingMethods.length === 0 && !isLoadingShipping && effectiveAddress?.country) {
+    if (shippingMethods.length === 0 && !isLoadingShipping && effectiveAddress?.country && !hasFetchedRef.current) {
+      hasFetchedRef.current = true;
       fetchShippingRates();
     }
   }, [shippingMethods.length, isLoadingShipping, effectiveAddress?.country, fetchShippingRates]);

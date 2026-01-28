@@ -161,13 +161,7 @@ export function useCheckout() {
    * Fetch shipping rates for current address
    */
   const fetchShippingRates = useCallback(async () => {
-    const { billingAddress, shippingAddress, sameAsShipping, isLoadingShipping } = checkoutState;
-
-    // Prevent duplicate calls while already loading
-    if (isLoadingShipping) {
-      return false;
-    }
-
+    const { billingAddress, shippingAddress, sameAsShipping } = checkoutState;
     const address = sameAsShipping ? billingAddress : shippingAddress;
 
     if (!address?.country) {
@@ -198,20 +192,17 @@ export function useCheckout() {
           dispatch(setError(response.data.message || 'No shipping methods available for your location'));
         }
 
-        dispatch(setShippingLoading(false));
         return true;
       } else {
         dispatch(setError(response.message || 'Failed to calculate shipping'));
-        dispatch(setShippingLoading(false));
         return false;
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to calculate shipping rates';
       dispatch(setError(message));
-      dispatch(setShippingLoading(false));
       return false;
     }
-  }, [dispatch, checkoutState.billingAddress, checkoutState.shippingAddress, checkoutState.sameAsShipping, checkoutState.isLoadingShipping]);
+  }, [dispatch, checkoutState.billingAddress, checkoutState.shippingAddress, checkoutState.sameAsShipping]);
 
   /**
    * Refresh shipping rates - refetches with loading indicator
