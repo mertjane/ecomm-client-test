@@ -36,7 +36,7 @@ export function useCheckout() {
   const router = useRouter();
   const checkoutState = useAppSelector((state) => state.checkout);
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-  const { items, totals, itemsCount } = useCart();
+  const { items, totals, itemsCount, isLoading: isCartLoading } = useCart();
 
   /**
    * Initialize checkout - called when entering checkout from cart
@@ -442,6 +442,7 @@ export function useCheckout() {
     cartItems: items,
     cartTotals: totals,
     cartItemsCount: itemsCount,
+    isCartLoading,
 
     // Calculated totals with shipping
     calculatedTotals: getCalculatedTotals(),

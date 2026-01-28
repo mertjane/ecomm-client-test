@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import {
@@ -11,15 +11,27 @@ import {
 } from '../redux/slices/authSlice';
 import { authApi, type LoginCredentials, type SignupData } from '../api/auth';
 
+// Module-level flag to track if auth initialization has started
+let authInitStarted = false;
+
 export function useAuth() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const authState = useAppSelector((state) => state.auth);
+  const initRef = useRef(false);
 
   /**
-   * Initialize auth state on mount
+   * Initialize auth state on mount - only runs once globally
    */
   useEffect(() => {
+    // Skip if already initialized or currently authenticated
+    if (initRef.current || authInitStarted || authState.isAuthenticated) {
+      return;
+    }
+
+    initRef.current = true;
+    authInitStarted = true;
+
     const initAuth = async () => {
       dispatch(setLoading(true));
       try {
@@ -36,7 +48,7 @@ export function useAuth() {
     };
 
     initAuth();
-  }, [dispatch]);
+  }, [dispatch, authState.isAuthenticated]);
 
   /**
    * Login user

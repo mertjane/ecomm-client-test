@@ -20,13 +20,15 @@ export default function CheckoutPage() {
     currentStep,
     cartItemsCount,
     cartItems,
+    isCartLoading,
     isAuthenticated,
     startCheckout,
   } = useCheckout();
 
   // Route protection - redirect if accessed directly without cart items
   useEffect(() => {
-    if (authLoading) return;
+    // Wait for both auth and cart to finish loading
+    if (authLoading || isCartLoading) return;
 
     // If no cart items, redirect to home
     if (cartItemsCount === 0 && cartItems.length === 0) {
@@ -38,10 +40,10 @@ export default function CheckoutPage() {
     if (!canAccess) {
       startCheckout();
     }
-  }, [authLoading, canAccess, cartItemsCount, cartItems.length, router, startCheckout]);
+  }, [authLoading, isCartLoading, canAccess, cartItemsCount, cartItems.length, router, startCheckout]);
 
-  // Show loading while checking auth
-  if (authLoading) {
+  // Show loading while checking auth or cart
+  if (authLoading || isCartLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-emperador" />
